@@ -8,6 +8,7 @@ import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotConstants.ElevatorConstants;
+import frc.robot.RobotConstants.InnerElevatorConstants;
 import frc.robot.RobotConstants.OuterElevatorConstants;
 import frc.robot.RobotConstants.SuperstructureGoal;
 import frc.robot.subsystems.superstructure.commands.MoveByJoystick;
@@ -26,7 +27,7 @@ public class Superstructure extends SubsystemBase
 
     public Superstructure()
     {
-        innerElevator = new Elevator(14, 1, OuterElevatorConstants.kConfig);
+        innerElevator = new Elevator(14, 1, InnerElevatorConstants.kConfig);
         outerElevator = new Elevator(15, 0, OuterElevatorConstants.kConfig);
         goal = SuperstructureGoal.START;
     }
@@ -102,5 +103,10 @@ public class Superstructure extends SubsystemBase
     public Command moveByJoystick(DoubleSupplier inner, DoubleSupplier outer)
     {
         return new MoveByJoystick(this, inner, outer);
+    }
+
+    public Command getHomingCommand()
+    {
+        return outerElevator.home().alongWith(innerElevator.home());
     }
 }

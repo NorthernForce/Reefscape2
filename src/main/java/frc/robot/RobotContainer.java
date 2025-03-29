@@ -72,9 +72,10 @@ public class RobotContainer
         drive.setDefaultCommand(drive.driveByJoystick(processJoystick(driverController::getLeftY),
                 processJoystick(driverController::getLeftX), processJoystick(driverController::getRightX)));
 
-        manipulator.setDefaultCommand(
-                new IntakeWhileWaiting(manipulator).andThen(new Purge(manipulator).withTimeout(Seconds.of(0.2)))
-                        .andThen(new IntakeWhileWaiting(manipulator, 0.2)));
+        // manipulator.setDefaultCommand(
+        // new IntakeWhileWaiting(manipulator).andThen(new
+        // Purge(manipulator).withTimeout(Seconds.of(0.2)))
+        // .andThen(new IntakeWhileWaiting(manipulator, 0.2)));
 
         driverController.back().onTrue(drive.resetOrientation());
 
@@ -97,14 +98,16 @@ public class RobotContainer
         NamedCommands.registerCommand("DriveToCloseLeft", driveToReefLeft());
         NamedCommands.registerCommand("DriveToCloseRight", driveToReefRight());
 
-        superstructure.setDefaultCommand(superstructure.moveByJoystick(
-                processJoystick(manipulatorController::getRightY), processJoystick(manipulatorController::getLeftY)));
+        superstructure.setDefaultCommand(superstructure.moveByJoystick(processJoystick(manipulatorController::getLeftY),
+                processJoystick(manipulatorController::getRightY)));
 
         manipulatorController.a().onTrue(superstructure.moveToIntake().withTimeout(1.75));
         manipulatorController.povDown().onTrue(superstructure.moveToL4().withTimeout(1.75));
         manipulatorController.povRight().onTrue(superstructure.moveToL3().withTimeout(1.75));
         manipulatorController.povUp().onTrue(superstructure.moveToL2().withTimeout(1.75));
         manipulatorController.povLeft().onTrue(superstructure.moveToL1().withTimeout(1.75));
+
+        manipulatorController.start().whileTrue(superstructure.getHomingCommand());
 
         NamedCommands.registerCommand("GoToL4Goal", superstructure.moveToL4());
         NamedCommands.registerCommand("GoToL3Goal", superstructure.moveToL3());

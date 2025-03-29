@@ -124,7 +124,7 @@ public class RobotConstants
         public static final Mass kInnerElevatorMass = Pounds.of(6.0);
 
         public static final ElevatorConfig kConfig = new ElevatorConfig(kS, kV, kA, kP, kI, kD, kG, kCruiseVelocity,
-                kAcceleration, kJerk, kSprocketCircumference, kGearBoxRatio, true, kLowerLimit, kUpperLimit,
+                kAcceleration, kJerk, kSprocketCircumference, kGearBoxRatio, false, kLowerLimit, kUpperLimit,
                 kInnerElevatorMass);
     }
 
@@ -153,7 +153,7 @@ public class RobotConstants
         public static final Mass kOuterElevatorMass = Pounds.of(14.0);
 
         public static final ElevatorConfig kConfig = new ElevatorConfig(kS, kV, kA, kP, kI, kD, kG, kCruiseVelocity,
-                kAcceleration, kJerk, kSprocketCircumference, kGearBoxRatio, false, kLowerLimit, kUpperLimit,
+                kAcceleration, kJerk, kSprocketCircumference, kGearBoxRatio, true, kLowerLimit, kUpperLimit,
                 kOuterElevatorMass);
     }
 
