@@ -82,7 +82,8 @@ public class RobotConstants
                 new Rotation3d(Degrees.zero(), Degrees.of(-22.4), Degrees.zero()));
     }
 
-    public static class ElevatorConstants {
+    public static class ElevatorConstants
+    {
         public static final double kHomingSpeed = 0.25;
         public static final Distance kTolerance = Inches.of(0.1);
     }

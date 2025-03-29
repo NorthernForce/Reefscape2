@@ -35,7 +35,8 @@ import frc.robot.subsystems.superstructure.elevator.commands.MoveElevatorToPosit
 import frc.robot.util.PhoenixUtil;
 
 @Logged
-public class Elevator extends SubsystemBase {
+public class Elevator extends SubsystemBase
+{
     private final TalonFX motor;
     private final ElevatorConfig constants;
     private final MotionMagicExpoVoltage motionMagicExpoVoltage = new MotionMagicExpoVoltage(0);
@@ -44,11 +45,14 @@ public class Elevator extends SubsystemBase {
     private final ElevatorSim sim;
     private final TalonFXSimState simState;
     private boolean hasResetLowerLimit = false;
+
     public static record ElevatorConfig(double kS, double kV, double kA, double kP, double kI, double kD, double kG,
             double cruiseVelocity, double acceleration, double jerk, Distance sprocketCircumference, double gearRatio,
             boolean inverted, Distance lowerLimit, Distance upperLimit, Mass mass) {
     }
-    public Elevator(int canID, int limitSwitchPin, ElevatorConfig constants) {
+
+    public Elevator(int canID, int limitSwitchPin, ElevatorConfig constants)
+    {
         motor = new TalonFX(canID);
         TalonFXConfiguration config = new TalonFXConfiguration();
         config.Slot0.kS = constants.kS;
@@ -61,7 +65,8 @@ public class Elevator extends SubsystemBase {
         config.MotionMagic.MotionMagicCruiseVelocity = constants.cruiseVelocity;
         config.MotionMagic.MotionMagicAcceleration = constants.acceleration;
         config.MotionMagic.MotionMagicJerk = constants.jerk;
-        config.MotorOutput.Inverted = constants.inverted ? InvertedValue.Clockwise_Positive : InvertedValue.CounterClockwise_Positive;
+        config.MotorOutput.Inverted = constants.inverted ? InvertedValue.Clockwise_Positive
+                : InvertedValue.CounterClockwise_Positive;
         config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
         config.Feedback.RotorToSensorRatio = 1;
         config.Feedback.SensorToMechanismRatio = constants.gearRatio / constants.sprocketCircumference.in(Inches);
@@ -87,33 +92,42 @@ public class Elevator extends SubsystemBase {
             simState = null;
         }
     }
-    public void setTargetHeight(Distance height) {
+
+    public void setTargetHeight(Distance height)
+    {
         motor.setControl(motionMagicExpoVoltage.withPosition(height.in(Inches)));
     }
+
     public Distance getHeight()
     {
         return Inches.of(position.getValue().in(Rotations));
     }
+
     public void set(double speed)
     {
         motor.set(speed + (getHeight().isNear(constants.lowerLimit, Inches.of(0.5)) ? 0 : constants.kG / 12.0));
     }
+
     public void stop()
     {
         motor.stopMotor();
     }
+
     public void resetPosition()
     {
         motor.setPosition(0);
     }
+
     public boolean isAtBottomLimit()
     {
         return !lowerLimitSwitch.get();
     }
+
     public boolean isPresent()
     {
         return motor.isConnected();
     }
+
     public void ignoreBottomLimit()
     {
         SoftwareLimitSwitchConfigs config = new SoftwareLimitSwitchConfigs();
@@ -121,6 +135,7 @@ public class Elevator extends SubsystemBase {
         config.ReverseSoftLimitEnable = false;
         PhoenixUtil.tryUntilOk(5, () -> motor.getConfigurator().apply(config));
     }
+
     public void useBottomLimit()
     {
         SoftwareLimitSwitchConfigs config = new SoftwareLimitSwitchConfigs();
@@ -128,18 +143,22 @@ public class Elevator extends SubsystemBase {
         config.ReverseSoftLimitEnable = true;
         PhoenixUtil.tryUntilOk(5, () -> motor.getConfigurator().apply(config));
     }
+
     public Command home()
     {
         return new HomeElevator(this);
     }
+
     public Command moveToPosition(Distance position)
     {
         return new MoveElevatorToPosition(this, position);
     }
+
     public Command controlByJoystick(DoubleSupplier input)
     {
         return run(() -> set(input.getAsDouble()));
     }
+
     @Override
     public void periodic()
     {
@@ -151,19 +170,20 @@ public class Elevator extends SubsystemBase {
                 resetPosition();
                 hasResetLowerLimit = true;
             }
-        }
-        else
+        } else
         {
             hasResetLowerLimit = false;
         }
     }
+
     @Override
     public void simulationPeriodic()
     {
         sim.setInput(simState.getMotorVoltage());
         sim.update(0.02);
         var velocity = MetersPerSecond.of(sim.getVelocityMetersPerSecond());
-        simState.setRotorVelocity(velocity.in(InchesPerSecond) * constants.gearRatio / constants.sprocketCircumference.in(Inches));
+        simState.setRotorVelocity(
+                velocity.in(InchesPerSecond) * constants.gearRatio / constants.sprocketCircumference.in(Inches));
         var dx = velocity.times(Seconds.of(0.02));
         simState.addRotorPosition(dx.in(Inches) * constants.gearRatio / constants.sprocketCircumference.in(Inches));
     }

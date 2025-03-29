@@ -15,39 +15,51 @@ import frc.robot.subsystems.superstructure.commands.MoveToState;
 import frc.robot.subsystems.superstructure.elevator.Elevator;
 
 @Logged
-public class Superstructure extends SubsystemBase {
+public class Superstructure extends SubsystemBase
+{
     public static record SuperstructureState(Distance innerElevatorHeight, Distance outerElevatorHeight) {
     }
+
     private final Elevator innerElevator;
     private final Elevator outerElevator;
     private SuperstructureGoal goal;
-    public Superstructure() {
+
+    public Superstructure()
+    {
         innerElevator = new Elevator(14, 1, OuterElevatorConstants.kConfig);
         outerElevator = new Elevator(15, 0, OuterElevatorConstants.kConfig);
         goal = SuperstructureGoal.START;
     }
-    public SuperstructureState getState() {
+
+    public SuperstructureState getState()
+    {
         return new SuperstructureState(innerElevator.getHeight(), outerElevator.getHeight());
     }
-    public boolean isAtHeight(Distance innerElevatorHeight, Distance outerElevatorHeight) {
+
+    public boolean isAtHeight(Distance innerElevatorHeight, Distance outerElevatorHeight)
+    {
         return innerElevator.getHeight().isNear(innerElevatorHeight, ElevatorConstants.kTolerance)
                 && outerElevator.getHeight().isNear(outerElevatorHeight, ElevatorConstants.kTolerance);
     }
-    public boolean isAtHeight(SuperstructureState state) {
+
+    public boolean isAtHeight(SuperstructureState state)
+    {
         return isAtHeight(state.innerElevatorHeight(), state.outerElevatorHeight());
     }
-    public boolean isAtTargetState() {
+
+    public boolean isAtTargetState()
+    {
         return isAtHeight(goal.getState());
     }
+
     public void setTargetState(SuperstructureGoal goal)
     {
         this.goal = goal;
     }
 
-    public Command moveToGoal(SuperstructureGoal goal) {
-        return runOnce(() -> setTargetState(goal)).andThen(
-            new MoveToState(this, goal)
-        );
+    public Command moveToGoal(SuperstructureGoal goal)
+    {
+        return runOnce(() -> setTargetState(goal)).andThen(new MoveToState(this, goal));
     }
 
     @NotLogged
@@ -55,7 +67,7 @@ public class Superstructure extends SubsystemBase {
     {
         return innerElevator;
     }
-    
+
     @NotLogged
     public Elevator getOuterElevator()
     {
@@ -66,18 +78,22 @@ public class Superstructure extends SubsystemBase {
     {
         return moveToGoal(SuperstructureGoal.L1);
     }
+
     public Command moveToL2()
     {
         return moveToGoal(SuperstructureGoal.L2);
     }
+
     public Command moveToL3()
     {
         return moveToGoal(SuperstructureGoal.L3);
     }
+
     public Command moveToL4()
     {
         return moveToGoal(SuperstructureGoal.L4);
     }
+
     public Command moveToIntake()
     {
         return moveToGoal(SuperstructureGoal.CORAL_STATION);

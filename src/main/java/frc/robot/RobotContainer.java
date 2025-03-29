@@ -80,9 +80,9 @@ public class RobotContainer
         NamedCommands.registerCommand("DriveToCloseLeft", driveToReefLeft());
         NamedCommands.registerCommand("DriveToCloseRight", driveToReefRight());
 
-        superstructure.setDefaultCommand(superstructure.moveByJoystick(processJoystick(manipulatorController::getRightY),
-            processJoystick(manipulatorController::getLeftY)));
-        
+        superstructure.setDefaultCommand(superstructure.moveByJoystick(
+                processJoystick(manipulatorController::getRightY), processJoystick(manipulatorController::getLeftY)));
+
         manipulatorController.a().onTrue(superstructure.moveToIntake().withTimeout(1.75));
         manipulatorController.povDown().onTrue(superstructure.moveToL4().withTimeout(1.75));
         manipulatorController.povLeft().onTrue(superstructure.moveToL3().withTimeout(1.75));
