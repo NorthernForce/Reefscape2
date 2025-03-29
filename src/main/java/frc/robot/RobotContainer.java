@@ -83,7 +83,7 @@ public class RobotContainer
 
         driverController.x().whileTrue(climber.getExtendCommand());
         driverController.y().whileTrue(climber.getRetractCommand());
-        
+
         NamedCommands.registerCommand("DriveToCloseLeft", driveToReefLeft());
         NamedCommands.registerCommand("DriveToCloseRight", driveToReefRight());
 
