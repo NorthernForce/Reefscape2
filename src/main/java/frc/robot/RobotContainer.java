@@ -28,6 +28,7 @@ import frc.robot.RobotConstants.DriveConstants;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.apriltags.Localizer;
 import frc.robot.subsystems.drive.CommandSwerveDrivetrain;
+import frc.robot.subsystems.superstructure.Superstructure;
 
 @Logged
 public class RobotContainer
@@ -35,10 +36,12 @@ public class RobotContainer
     private final CommandSwerveDrivetrain drive;
     private final SendableChooser<Command> autonomousChooser;
     private final Localizer localizer = new Localizer();
+    private final Superstructure superstructure;
 
     public RobotContainer()
     {
         drive = TunerConstants.createDrivetrain();
+        superstructure = new Superstructure();
         configureBindings();
         autonomousChooser = getAutonomousChooser();
         SmartDashboard.putData("AutonomousChooser", autonomousChooser);
@@ -50,7 +53,7 @@ public class RobotContainer
         return () ->
         {
             var x = MathUtil.applyDeadband(joystick.getAsDouble(), 0.1);
-            return x * Math.abs(x);
+            return -x * Math.abs(x);
         };
     }
 
@@ -76,6 +79,21 @@ public class RobotContainer
 
         NamedCommands.registerCommand("DriveToCloseLeft", driveToReefLeft());
         NamedCommands.registerCommand("DriveToCloseRight", driveToReefRight());
+
+        superstructure.setDefaultCommand(superstructure.moveByJoystick(processJoystick(manipulatorController::getRightY),
+            processJoystick(manipulatorController::getLeftY)));
+        
+        manipulatorController.a().onTrue(superstructure.moveToIntake().withTimeout(1.75));
+        manipulatorController.povDown().onTrue(superstructure.moveToL4().withTimeout(1.75));
+        manipulatorController.povLeft().onTrue(superstructure.moveToL3().withTimeout(1.75));
+        manipulatorController.povUp().onTrue(superstructure.moveToL2().withTimeout(1.75));
+        manipulatorController.povRight().onTrue(superstructure.moveToL1().withTimeout(1.75));
+
+        NamedCommands.registerCommand("GoToL4Goal", superstructure.moveToL4());
+        NamedCommands.registerCommand("GoToL3Goal", superstructure.moveToL3());
+        NamedCommands.registerCommand("GoToL2Goal", superstructure.moveToL2());
+        NamedCommands.registerCommand("GoToL1Goal", superstructure.moveToL1());
+        NamedCommands.registerCommand("GoToIntake", superstructure.moveToIntake());
     }
 
     public Command getAutonomousCommand()
