@@ -26,6 +26,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.FieldConstants.ReefSide;
 import frc.robot.RobotConstants.DriveConstants;
 import frc.robot.generated.TunerConstants;
+import frc.robot.subsystems.algae_extractor.AlgaeExtractor;
 import frc.robot.subsystems.apriltags.Localizer;
 import frc.robot.subsystems.drive.CommandSwerveDrivetrain;
 import frc.robot.subsystems.superstructure.Superstructure;
@@ -37,11 +38,16 @@ public class RobotContainer
     private final SendableChooser<Command> autonomousChooser;
     private final Localizer localizer = new Localizer();
     private final Superstructure superstructure;
+    private final AlgaeExtractor algaeExtractor;
 
     public RobotContainer()
     {
         drive = TunerConstants.createDrivetrain();
         superstructure = new Superstructure();
+        algaeExtractor = new AlgaeExtractor(RobotConstants.AlgaeRemoverConstants.kMotorId,
+                RobotConstants.AlgaeRemoverConstants.kSensorId, RobotConstants.AlgaeRemoverConstants.kInverted,
+                RobotConstants.AlgaeRemoverConstants.kGearRatio, RobotConstants.AlgaeRemoverConstants.kRemovingSpeed,
+                RobotConstants.AlgaeRemoverConstants.kReturningSpeed);
         configureBindings();
         autonomousChooser = getAutonomousChooser();
         SmartDashboard.putData("AutonomousChooser", autonomousChooser);
@@ -76,6 +82,10 @@ public class RobotContainer
         manipulatorController.leftBumper().whileTrue(drive.strafeLeft(0.4));
 
         manipulatorController.rightBumper().whileTrue(drive.strafeRight(0.4));
+
+        manipulatorController.leftTrigger().whileTrue(algaeExtractor.getExtractCommand());
+
+        algaeExtractor.setDefaultCommand(algaeExtractor.getReturnCommand());
 
         NamedCommands.registerCommand("DriveToCloseLeft", driveToReefLeft());
         NamedCommands.registerCommand("DriveToCloseRight", driveToReefRight());
