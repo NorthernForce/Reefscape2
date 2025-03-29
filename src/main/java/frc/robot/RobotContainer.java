@@ -42,8 +42,8 @@ public class RobotContainer
 
     public RobotContainer()
     {
-        climber = new Climber(RobotConstants.ClimberConstants.kId, RobotConstants.ClimberConstants.kEncoderId,
-                RobotConstants.ClimberConstants.kClimbSpeed);
+        climber = new Climber(RobotConstants.ClimberConstants.kId, RobotConstants.ClimberConstants.kClimbSpeed,
+                RobotConstants.ClimberConstants.kInverted);
         drive = TunerConstants.createDrivetrain();
         superstructure = new Superstructure();
         configureBindings();

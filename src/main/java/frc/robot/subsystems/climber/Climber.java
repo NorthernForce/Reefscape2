@@ -1,7 +1,9 @@
 package frc.robot.subsystems.climber;
 
-import com.ctre.phoenix6.hardware.CANcoder;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -15,17 +17,17 @@ public class Climber extends SubsystemBase
     private final int m_motorId;
     private final TalonFX m_motor;
     private final double m_climbSpeed;
-    private final int m_encoderId;
-    private final CANcoder m_encoder;
 
-    public Climber(int motorId, int encoderId, double climbSpeed)
+    public Climber(int motorId, double climbSpeed, boolean inverted)
     {
         m_motorId = motorId;
         m_motor = new TalonFX(m_motorId);
-        m_encoder = new CANcoder(encoderId);
 
+        TalonFXConfiguration config = new TalonFXConfiguration();
+        config.MotorOutput.Inverted = (inverted ? InvertedValue.Clockwise_Positive
+                : InvertedValue.CounterClockwise_Positive);
+        config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
         this.m_climbSpeed = climbSpeed;
-        this.m_encoderId = encoderId;
     }
 
     public void extend()
