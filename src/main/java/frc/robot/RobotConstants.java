@@ -76,4 +76,15 @@ public class RobotConstants
                 new Translation3d(Inches.of(15.0 - 2.5), Inches.zero(), Inches.of(9.5)),
                 new Rotation3d(Degrees.zero(), Degrees.of(-22.4), Degrees.zero()));
     }
+
+    public static class ManipulatorConstants
+    {
+        public static final double kIntakeSpeed = 0.6;
+        public static final double kOuttakeSpeed = 0.89;
+        public static final double kSlowOuttakeSpeed = 0.4;
+        public static final double kPurgeSpeed = 0.2;
+        public static final int kMotorId = 19;
+        public static final boolean kMotorInverted = false;
+        public static final int kSensorId = 2;
+    }
 }

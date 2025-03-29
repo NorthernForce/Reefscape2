@@ -5,6 +5,7 @@
 package frc.robot;
 
 import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.Seconds;
 
 import java.util.Set;
 import java.util.function.DoubleSupplier;
@@ -28,6 +29,10 @@ import frc.robot.RobotConstants.DriveConstants;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.apriltags.Localizer;
 import frc.robot.subsystems.drive.CommandSwerveDrivetrain;
+import frc.robot.subsystems.manipulator.Manipulator;
+import frc.robot.subsystems.manipulator.commands.IntakeWhileWaiting;
+import frc.robot.subsystems.manipulator.commands.Outtake;
+import frc.robot.subsystems.manipulator.commands.Purge;
 
 @Logged
 public class RobotContainer
@@ -35,6 +40,7 @@ public class RobotContainer
     private final CommandSwerveDrivetrain drive;
     private final SendableChooser<Command> autonomousChooser;
     private final Localizer localizer = new Localizer();
+    private final Manipulator manipulator = new Manipulator(RobotConstants.ManipulatorConstants.kMotorId, RobotConstants.ManipulatorConstants.kSensorId);
 
     public RobotContainer()
     {
@@ -61,7 +67,9 @@ public class RobotContainer
 
         drive.setDefaultCommand(drive.driveByJoystick(processJoystick(driverController::getLeftY),
                 processJoystick(driverController::getLeftX), processJoystick(driverController::getRightX)));
-
+                
+        manipulator.setDefaultCommand(new IntakeWhileWaiting(manipulator).andThen(new Purge(manipulator).withTimeout(Seconds.of(0.2))).andThen(new IntakeWhileWaiting(manipulator, 0.2)));
+        
         driverController.back().onTrue(drive.resetOrientation());
 
         driverController.leftBumper().whileTrue(driveToReefLeft());
@@ -73,9 +81,12 @@ public class RobotContainer
         manipulatorController.leftBumper().whileTrue(drive.strafeLeft(0.4));
 
         manipulatorController.rightBumper().whileTrue(drive.strafeRight(0.4));
-
+        
+        manipulatorController.rightTrigger().whileTrue(new Outtake(manipulator));
+        
         NamedCommands.registerCommand("DriveToCloseLeft", driveToReefLeft());
         NamedCommands.registerCommand("DriveToCloseRight", driveToReefRight());
+        
     }
 
     public Command getAutonomousCommand()
