@@ -22,11 +22,12 @@ public class FieldConstants
      */
     public static enum ReefLocations
     {
-        A, B, C, D, E, F, G, H, I, J, K, L, AB_ALGAE, CD_ALGAE, EF_ALGAE, GH_ALGAE, IJ_ALGAE, KL_ALGAE,
-        LEFT_CORAL_STATION, RIGHT_CORAL_STATION, PROCESSOR_STATION
+        A, B, C, D, E, F, G, H, I, J, K, L, AB_ALGAE, CD_ALGAE, EF_ALGAE, GH_ALGAE, IJ_ALGAE, KL_ALGAE, AB_TROUGH,
+        CD_TROUGH, EF_TROUGH, GH_TROUGH, IJ_TROUGH, KL_TROUGH, LEFT_CORAL_STATION, RIGHT_CORAL_STATION,
+        PROCESSOR_STATION
     }
 
-    public static record ReefSide(Pose2d left, Pose2d right, Pose2d center) {
+    public static record ReefSide(Pose2d left, Pose2d right, Pose2d center, Pose2d trough) {
     }
 
     public static class ReefRotations
@@ -55,7 +56,7 @@ public class FieldConstants
      */
     public static class ReefPositions
     {
-
+        public static final Translation2d REEF_CENTER = new Translation2d(4.489323, 4.0259);
         public static final Pose2d A = new Pose2d(3.15, 4.18, ReefRotations.AB_ROTATION);
         public static final Pose2d AB_ALGAE = new Pose2d(3.15, 4.02, ReefRotations.AB_ROTATION);
         public static final Pose2d B = new Pose2d(3.15, 3.85, ReefRotations.AB_ROTATION);
@@ -74,12 +75,22 @@ public class FieldConstants
         public static final Pose2d K = new Pose2d(3.95, 5.29, ReefRotations.KL_ROTATION);
         public static final Pose2d KL_ALGAE = new Pose2d(3.82, 5.19, ReefRotations.KL_ROTATION);
         public static final Pose2d L = new Pose2d(3.65, 5.12, ReefRotations.KL_ROTATION);
-        public static final ReefSide AB_SIDE = new ReefSide(A, B, AB_ALGAE);
-        public static final ReefSide CD_SIDE = new ReefSide(C, D, CD_ALGAE);
-        public static final ReefSide EF_SIDE = new ReefSide(E, F, EF_ALGAE);
-        public static final ReefSide GH_SIDE = new ReefSide(G, H, GH_ALGAE);
-        public static final ReefSide IJ_SIDE = new ReefSide(I, J, IJ_ALGAE);
-        public static final ReefSide KL_SIDE = new ReefSide(K, L, KL_ALGAE);
+        public static final Pose2d AB_TROUGH = new Pose2d(3.531, 5.203,
+                ReefRotations.AB_ROTATION.plus(Rotation2d.kCW_90deg));
+        public static final Pose2d CD_TROUGH = AB_TROUGH.rotateAround(REEF_CENTER, Rotation2d.fromDegrees(60));
+        public static final Pose2d EF_TROUGH = AB_TROUGH.rotateAround(REEF_CENTER, Rotation2d.fromDegrees(120));
+        public static final Pose2d GH_TROUGH = AB_TROUGH.rotateAround(REEF_CENTER, Rotation2d.fromDegrees(180));
+        public static final Pose2d IJ_TROUGH = AB_TROUGH.rotateAround(REEF_CENTER, Rotation2d.fromDegrees(240));
+        public static final Pose2d KL_TROUGH = AB_TROUGH.rotateAround(REEF_CENTER, Rotation2d.fromDegrees(300));
+        public static final ReefSide AB_SIDE = new ReefSide(A, B, AB_ALGAE, CD_TROUGH);
+        public static final ReefSide CD_SIDE = new ReefSide(C, D, CD_ALGAE, EF_TROUGH);
+        public static final ReefSide EF_SIDE = new ReefSide(E, F, EF_ALGAE, GH_TROUGH);
+        public static final ReefSide GH_SIDE = new ReefSide(G, H, GH_ALGAE, IJ_TROUGH);
+        public static final ReefSide IJ_SIDE = new ReefSide(I, J, IJ_ALGAE, KL_TROUGH);
+        public static final ReefSide KL_SIDE = new ReefSide(K, L, KL_ALGAE, AB_TROUGH);
+
+        public static final ReefSide[] REEF_SIDES =
+        { AB_SIDE, CD_SIDE, EF_SIDE, GH_SIDE, IJ_SIDE, KL_SIDE };
     }
 
     public static final HashMap<ReefLocations, Pose2d> REEF_POSITIONS = new HashMap<>();
@@ -103,6 +114,12 @@ public class FieldConstants
         REEF_POSITIONS.put(ReefLocations.GH_ALGAE, ReefPositions.GH_ALGAE);
         REEF_POSITIONS.put(ReefLocations.IJ_ALGAE, ReefPositions.IJ_ALGAE);
         REEF_POSITIONS.put(ReefLocations.KL_ALGAE, ReefPositions.KL_ALGAE);
+        REEF_POSITIONS.put(ReefLocations.AB_TROUGH, ReefPositions.AB_TROUGH);
+        REEF_POSITIONS.put(ReefLocations.CD_TROUGH, ReefPositions.CD_TROUGH);
+        REEF_POSITIONS.put(ReefLocations.EF_TROUGH, ReefPositions.EF_TROUGH);
+        REEF_POSITIONS.put(ReefLocations.GH_TROUGH, ReefPositions.GH_TROUGH);
+        REEF_POSITIONS.put(ReefLocations.IJ_TROUGH, ReefPositions.IJ_TROUGH);
+        REEF_POSITIONS.put(ReefLocations.KL_TROUGH, ReefPositions.KL_TROUGH);
         REEF_POSITIONS.put(ReefLocations.LEFT_CORAL_STATION, CoralStations.LEFT);
         REEF_POSITIONS.put(ReefLocations.RIGHT_CORAL_STATION, CoralStations.RIGHT);
         REEF_POSITIONS.put(ReefLocations.PROCESSOR_STATION, ProcessorStations.PROCESSOR_STATION);
@@ -160,6 +177,12 @@ public class FieldConstants
         return convertPoseByAlliance(pose, getAlliance());
     }
 
+    public static Pose2d applyOffset(Pose2d pose, Translation2d offset)
+    {
+        Translation2d translation = offset.rotateBy(pose.getRotation());
+        return new Pose2d(pose.getTranslation().plus(translation), pose.getRotation());
+    }
+
     public static Translation2d convertTranslationByAlliance(Translation2d pose, Alliance alliance)
     {
         if (alliance == Alliance.Blue)
@@ -184,13 +207,18 @@ public class FieldConstants
         } else
         {
             return new ReefSide(convertPoseByAlliance(side.left), convertPoseByAlliance(side.right),
-                    convertPoseByAlliance(side.center));
+                    convertPoseByAlliance(side.center), convertPoseByAlliance(side.trough));
         }
+    }
+
+    public static ReefSide convertReefSideByAlliance(ReefSide side)
+    {
+        return convertReefSideByAlliance(side, getAlliance());
     }
 
     public static Alliance getAlliance()
     {
-        return DriverStation.getAlliance().orElse(Alliance.Blue);
+        return DriverStation.getAlliance().orElse(Alliance.Red);
     }
 
     public static class CoralRotations
