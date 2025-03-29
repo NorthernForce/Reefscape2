@@ -33,6 +33,7 @@ import frc.robot.subsystems.manipulator.Manipulator;
 import frc.robot.subsystems.manipulator.commands.IntakeWhileWaiting;
 import frc.robot.subsystems.manipulator.commands.Outtake;
 import frc.robot.subsystems.manipulator.commands.Purge;
+import frc.robot.subsystems.superstructure.Superstructure;
 
 @Logged
 public class RobotContainer
@@ -40,11 +41,13 @@ public class RobotContainer
     private final CommandSwerveDrivetrain drive;
     private final SendableChooser<Command> autonomousChooser;
     private final Localizer localizer = new Localizer();
-    private final Manipulator manipulator = new Manipulator(RobotConstants.ManipulatorConstants.kMotorId, RobotConstants.ManipulatorConstants.kSensorId);
+    private final Manipulator manipulator = new Manipulator();
+    private final Superstructure superstructure;
 
     public RobotContainer()
     {
         drive = TunerConstants.createDrivetrain();
+        superstructure = new Superstructure();
         configureBindings();
         autonomousChooser = getAutonomousChooser();
         SmartDashboard.putData("AutonomousChooser", autonomousChooser);
@@ -56,7 +59,7 @@ public class RobotContainer
         return () ->
         {
             var x = MathUtil.applyDeadband(joystick.getAsDouble(), 0.1);
-            return x * Math.abs(x);
+            return -x * Math.abs(x);
         };
     }
 
@@ -67,9 +70,11 @@ public class RobotContainer
 
         drive.setDefaultCommand(drive.driveByJoystick(processJoystick(driverController::getLeftY),
                 processJoystick(driverController::getLeftX), processJoystick(driverController::getRightX)));
-                
-        manipulator.setDefaultCommand(new IntakeWhileWaiting(manipulator).andThen(new Purge(manipulator).withTimeout(Seconds.of(0.2))).andThen(new IntakeWhileWaiting(manipulator, 0.2)));
-        
+
+        manipulator.setDefaultCommand(
+                new IntakeWhileWaiting(manipulator).andThen(new Purge(manipulator).withTimeout(Seconds.of(0.2)))
+                        .andThen(new IntakeWhileWaiting(manipulator, 0.2)));
+
         driverController.back().onTrue(drive.resetOrientation());
 
         driverController.leftBumper().whileTrue(driveToReefLeft());
@@ -81,12 +86,26 @@ public class RobotContainer
         manipulatorController.leftBumper().whileTrue(drive.strafeLeft(0.4));
 
         manipulatorController.rightBumper().whileTrue(drive.strafeRight(0.4));
-        
+
         manipulatorController.rightTrigger().whileTrue(new Outtake(manipulator));
-        
+
         NamedCommands.registerCommand("DriveToCloseLeft", driveToReefLeft());
         NamedCommands.registerCommand("DriveToCloseRight", driveToReefRight());
-        
+
+        superstructure.setDefaultCommand(superstructure.moveByJoystick(
+                processJoystick(manipulatorController::getRightY), processJoystick(manipulatorController::getLeftY)));
+
+        manipulatorController.a().onTrue(superstructure.moveToIntake().withTimeout(1.75));
+        manipulatorController.povDown().onTrue(superstructure.moveToL4().withTimeout(1.75));
+        manipulatorController.povLeft().onTrue(superstructure.moveToL3().withTimeout(1.75));
+        manipulatorController.povUp().onTrue(superstructure.moveToL2().withTimeout(1.75));
+        manipulatorController.povRight().onTrue(superstructure.moveToL1().withTimeout(1.75));
+
+        NamedCommands.registerCommand("GoToL4Goal", superstructure.moveToL4());
+        NamedCommands.registerCommand("GoToL3Goal", superstructure.moveToL3());
+        NamedCommands.registerCommand("GoToL2Goal", superstructure.moveToL2());
+        NamedCommands.registerCommand("GoToL1Goal", superstructure.moveToL1());
+        NamedCommands.registerCommand("GoToIntake", superstructure.moveToIntake());
     }
 
     public Command getAutonomousCommand()

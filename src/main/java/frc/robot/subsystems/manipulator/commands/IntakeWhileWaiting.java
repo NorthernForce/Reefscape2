@@ -4,7 +4,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.RobotConstants;
 import frc.robot.subsystems.manipulator.Manipulator;
 
-public class IntakeWhileWaiting extends Command {
+public class IntakeWhileWaiting extends Command
+{
     private final double m_speed;
     private final Manipulator m_manipulator;
 
@@ -26,7 +27,8 @@ public class IntakeWhileWaiting extends Command {
         if (m_manipulator.hasCoral())
         {
             m_manipulator.stop();
-        } else {
+        } else
+        {
             m_manipulator.set(m_speed);
         }
     }

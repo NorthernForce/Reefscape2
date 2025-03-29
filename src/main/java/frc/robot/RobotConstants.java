@@ -5,6 +5,7 @@ import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
+import static edu.wpi.first.units.Units.Pounds;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Volts;
@@ -16,13 +17,17 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearAcceleration;
 import edu.wpi.first.units.measure.LinearVelocity;
+import edu.wpi.first.units.measure.Mass;
 import edu.wpi.first.units.measure.Voltage;
 import frc.robot.generated.TunerConstants;
+import frc.robot.subsystems.superstructure.Superstructure.SuperstructureState;
+import frc.robot.subsystems.superstructure.elevator.Elevator.ElevatorConfig;
 
 public class RobotConstants
 {
@@ -87,4 +92,95 @@ public class RobotConstants
         public static final boolean kMotorInverted = false;
         public static final int kSensorId = 2;
     }
+
+    public static class ElevatorConstants
+    {
+        public static final double kHomingSpeed = 0.25;
+        public static final Distance kTolerance = Inches.of(0.1);
+    }
+
+    public static class InnerElevatorConstants
+    {
+        // outer ratios
+        public static final double kGearBoxRatio = 12.0;
+        public static final double kSprocketTeeth = 16.0;
+        public static final Distance kSproketPitch = Inches.of(0.25);
+        public static final Distance kSprocketCircumference = kSproketPitch.times(kSprocketTeeth);
+
+        // talon configs
+        public static final double kS = 0.017384;
+        public static final double kV = Units.inchesToMeters(28.59);
+        public static final double kA = 0.015;
+        public static final double kP = 18;
+        public static final double kI = 0.0;
+        public static final double kD = 0;
+        public static final double kG = 0.21;
+        public static final double kCruiseVelocity = 500;
+        public static final double kAcceleration = 50;
+        public static final double kJerk = 0;
+        public static final Distance kLowerLimit = Inches.of(0.0);
+        public static final Distance kUpperLimit = Inches.of(24.3);
+
+        public static final Mass kInnerElevatorMass = Pounds.of(6.0);
+
+        public static final ElevatorConfig kConfig = new ElevatorConfig(kS, kV, kA, kP, kI, kD, kG, kCruiseVelocity,
+                kAcceleration, kJerk, kSprocketCircumference, kGearBoxRatio, true, kLowerLimit, kUpperLimit,
+                kInnerElevatorMass);
+    }
+
+    public static class OuterElevatorConstants
+    {
+        // outer ratios
+        public static final double kGearBoxRatio = 16.0;
+        public static final double kSprocketTeeth = 22.0;
+        public static final Distance kSprocketPitch = Inches.of(0.25);
+        public static final Distance kSprocketCircumference = kSprocketPitch.times(kSprocketTeeth);
+
+        // talon configs
+        public static final double kS = 0.052289;
+        public static final double kV = Units.inchesToMeters(19.868);
+        public static final double kA = 0.015;
+        public static final double kP = 10;
+        public static final double kI = 0;
+        public static final double kD = 0;
+        public static final double kG = 0.31;
+        public static final double kCruiseVelocity = 500;
+        public static final double kAcceleration = 50;
+        public static final double kJerk = 0;
+        public static final Distance kLowerLimit = Inches.of(0.0);
+        public static final Distance kUpperLimit = Inches.of(26.5);
+
+        public static final Mass kOuterElevatorMass = Pounds.of(14.0);
+
+        public static final ElevatorConfig kConfig = new ElevatorConfig(kS, kV, kA, kP, kI, kD, kG, kCruiseVelocity,
+                kAcceleration, kJerk, kSprocketCircumference, kGearBoxRatio, false, kLowerLimit, kUpperLimit,
+                kOuterElevatorMass);
+    }
+
+    public static enum SuperstructureGoal
+    {
+        L1(Inches.of(0), Inches.of(2)), L2(Inches.of(0), Inches.of(11.38)), L3(Inches.of(0), Inches.of(26.3)),
+        L4(InnerElevatorConstants.kUpperLimit, OuterElevatorConstants.kUpperLimit),
+        CORAL_STATION(Inches.of(0), Inches.of(0)), START(Inches.of(0), Inches.of(0));
+
+        private final SuperstructureState state;
+
+        /**
+         * Superstructure state constructor
+         * 
+         * @param innerHeight height of the inner elevator to go to
+         * @param outerHeight height of the outer elevator to go to
+         */
+
+        private SuperstructureGoal(Distance innerHeight, Distance outerHeight)
+        {
+            this.state = new SuperstructureState(innerHeight, outerHeight);
+        }
+
+        public SuperstructureState getState()
+        {
+            return state;
+        }
+    }
+
 }
