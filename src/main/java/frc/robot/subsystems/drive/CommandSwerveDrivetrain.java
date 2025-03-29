@@ -8,6 +8,7 @@ import java.util.function.Supplier;
 
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.Utils;
+import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveRequest;
@@ -17,21 +18,25 @@ import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 
 import edu.wpi.first.epilogue.Logged;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Notifier;
+import edu.wpi.first.wpilibj.Preferences;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
+import frc.robot.RobotConstants;
 import frc.robot.RobotConstants.DriveConstants;
 import frc.robot.generated.TunerConstants;
 import frc.robot.generated.TunerConstants.TunerSwerveDrivetrain;
@@ -119,10 +124,12 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
      * @param drivetrainConstants Drivetrain-wide constants for the swerve drive
      * @param modules             Constants for each specific module
      */
-    public CommandSwerveDrivetrain(SwerveDrivetrainConstants drivetrainConstants,
+    public CommandSwerveDrivetrain(SwerveDrivetrainConstants drivetrainConstants, Angle[] swerveOffsets,
             SwerveModuleConstants<?, ?, ?>... modules)
     {
-        super(drivetrainConstants, modules);
+        super(drivetrainConstants, modules[0].withEncoderOffset(swerveOffsets[0]),
+                modules[1].withEncoderOffset(swerveOffsets[1]), modules[2].withEncoderOffset(swerveOffsets[2]),
+                modules[3].withEncoderOffset(swerveOffsets[3]));
         if (Utils.isSimulation())
         {
             startSimThread();
@@ -335,7 +342,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         return applyRequest(() -> fieldCentric
                 .withVelocityX(forward.getAsDouble() * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond))
                 .withVelocityY(strafe.getAsDouble() * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond))
-                .withRotationalRate(rotation.getAsDouble()));
+                .withRotationalRate(rotation.getAsDouble()
+                        * RobotConstants.DriveConstants.kMaxAngularVelocity.in(RadiansPerSecond)));
     }
 
     public Pose2d getPose()
@@ -391,11 +399,52 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     public Command strafeLeft(double speed)
     {
-        return driveAtRobotRelativeSpeeds(new ChassisSpeeds(0, -speed, 0));
+        return driveAtRobotRelativeSpeeds(new ChassisSpeeds(0, speed, 0));
     }
 
     public Command strafeRight(double speed)
     {
-        return driveAtRobotRelativeSpeeds(new ChassisSpeeds(0, speed, 0));
+        return driveAtRobotRelativeSpeeds(new ChassisSpeeds(0, -speed, 0));
+    }
+
+    private Angle resetEncoderAngle(int moduleIdx, Angle targetAngle)
+    {
+        final var module = getModule(moduleIdx);
+        final var currentAngle = Rotations.of(module.getCurrentState().angle.getRotations());
+        final var delta = targetAngle.minus(currentAngle);
+        final var cancoder = module.getEncoder();
+        final var config = new CANcoderConfiguration();
+        cancoder.getConfigurator().refresh(config);
+        final var currentOffest = Rotations.of(config.MagnetSensor.MagnetOffset);
+        var newOffset = currentOffest.plus(delta);
+        newOffset = Radians.of(MathUtil.angleModulus(newOffset.in(Radians)));
+        config.MagnetSensor.MagnetOffset = newOffset.in(Rotations);
+        cancoder.getConfigurator().apply(config);
+        return newOffset;
+    }
+
+    public Angle[] resetEncoderAngles(Angle[] targetAngles)
+    {
+        final var newOffsets = new Angle[targetAngles.length];
+        for (int i = 0; i < targetAngles.length; i++)
+        {
+            newOffsets[i] = resetEncoderAngle(i, targetAngles[i]);
+        }
+        return newOffsets;
+    }
+
+    public void resetDriveEncoders()
+    {
+        final var offsets = resetEncoderAngles(new Angle[]
+        { Degrees.of(0), Degrees.of(0), Degrees.of(0), Degrees.of(0) });
+        Preferences.setDouble("kSwerveOffsetFrontLeft", offsets[0].in(Rotations));
+        Preferences.setDouble("kSwerveOffsetFrontRight", offsets[1].in(Rotations));
+        Preferences.setDouble("kSwerveOffsetBackLeft", offsets[2].in(Rotations));
+        Preferences.setDouble("kSwerveOffsetBackRight", offsets[3].in(Rotations));
+    }
+
+    public Command resetEncoders()
+    {
+        return Commands.runOnce(this::resetDriveEncoders);
     }
 }
