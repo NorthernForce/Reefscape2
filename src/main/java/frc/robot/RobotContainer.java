@@ -27,6 +27,7 @@ import frc.robot.FieldConstants.ReefSide;
 import frc.robot.RobotConstants.DriveConstants;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.apriltags.Localizer;
+import frc.robot.subsystems.climber.Climber;
 import frc.robot.subsystems.drive.CommandSwerveDrivetrain;
 
 @Logged
@@ -35,14 +36,22 @@ public class RobotContainer
     private final CommandSwerveDrivetrain drive;
     private final SendableChooser<Command> autonomousChooser;
     private final Localizer localizer = new Localizer();
+    private final Climber climber;
+    private final CommandXboxController driverController;
 
     public RobotContainer()
     {
+        driverController = new CommandXboxController(0);
+        climber = new Climber(RobotConstants.ClimberConstants.kId, RobotConstants.ClimberConstants.kEncoderId,
+                RobotConstants.ClimberConstants.kClimbSpeed);
         drive = TunerConstants.createDrivetrain();
         configureBindings();
         autonomousChooser = getAutonomousChooser();
         SmartDashboard.putData("AutonomousChooser", autonomousChooser);
         SmartDashboard.putData("Test Left Reef", driveToReefLeft());
+
+        driverController.x().whileTrue(climber.getExtendCommand());
+        driverController.y().whileTrue(climber.getRetractCommand());
     }
 
     private static DoubleSupplier processJoystick(DoubleSupplier joystick)

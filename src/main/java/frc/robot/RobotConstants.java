@@ -1,13 +1,6 @@
 package frc.robot;
 
-import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.Inches;
-import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.MetersPerSecond;
-import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
-import static edu.wpi.first.units.Units.RadiansPerSecond;
-import static edu.wpi.first.units.Units.RadiansPerSecondPerSecond;
-import static edu.wpi.first.units.Units.Volts;
+import static edu.wpi.first.units.Units.*;
 
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.path.PathConstraints;
@@ -16,6 +9,7 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
@@ -75,5 +69,16 @@ public class RobotConstants
         public static final Transform3d kCenterCameraTransform = new Transform3d(
                 new Translation3d(Inches.of(15.0 - 2.5), Inches.zero(), Inches.of(9.5)),
                 new Rotation3d(Degrees.zero(), Degrees.of(-22.4), Degrees.zero()));
+    }
+
+    public static class ClimberConstants
+    {
+        public static final int kId = 17;
+        public static final boolean kInverted = false;
+        public static final int kEncoderId = 23;
+        public static final Angle kLowerLimit = Rotations.of(-0.03);
+        public static final Angle kUpperLimit = Rotations.of(0.22);
+        public static final Angle kSweetAngle = Degrees.of(70.0);
+        public static final double kClimbSpeed = 1;
     }
 }
