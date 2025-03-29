@@ -13,7 +13,6 @@ import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 
@@ -21,6 +20,7 @@ import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -32,8 +32,10 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
+import frc.robot.RobotConstants.DriveConstants;
 import frc.robot.generated.TunerConstants;
 import frc.robot.generated.TunerConstants.TunerSwerveDrivetrain;
+import frc.robot.subsystems.drive.requests.CloseDriveToPoseRequest;
 
 /**
  * Class that extends the Phoenix 6 SwerveDrivetrain class and implements
@@ -199,9 +201,9 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                             .withWheelForceFeedforwardsY(feedforwards.robotRelativeForcesYNewtons())),
                     new PPHolonomicDriveController(
                             // PID constants for translation
-                            new PIDConstants(10, 0, 0),
+                            DriveConstants.kPPDrivePID,
                             // PID constants for rotation
-                            new PIDConstants(7, 0, 0)),
+                            DriveConstants.kPPDriveRPID),
                     config,
                     // Assume the path needs to be flipped for Red vs Blue, this is normally the
                     // case
@@ -330,10 +332,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     {
         SwerveRequest.FieldCentric fieldCentric = new SwerveRequest.FieldCentric()
                 .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
-        return run(() -> setControl(
-                fieldCentric.withVelocityX(forward.getAsDouble() * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond))
-                        .withVelocityY(strafe.getAsDouble() * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond))
-                        .withRotationalRate(rotation.getAsDouble())));
+        return applyRequest(() -> fieldCentric
+                .withVelocityX(forward.getAsDouble() * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond))
+                .withVelocityY(strafe.getAsDouble() * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond))
+                .withRotationalRate(rotation.getAsDouble()));
     }
 
     public Pose2d getPose()
@@ -349,5 +351,51 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     public Command resetOrientation()
     {
         return Commands.defer(() -> resetOrientation(getOperatorForwardDirection()), Set.of(this));
+    }
+
+    public Command pathfindToPose(Pose2d pose)
+    {
+        return AutoBuilder.pathfindToPose(pose, DriveConstants.kPPConstraints);
+    }
+
+    public Command closeDriveToPose(Pose2d pose)
+    {
+        CloseDriveToPoseRequest request = new CloseDriveToPoseRequest(pose, DriveConstants.kCloseDriveTP,
+                DriveConstants.kCloseDriveTI, DriveConstants.kCloseDriveTD, DriveConstants.kCloseDriveRP,
+                DriveConstants.kCloseDriveRI, DriveConstants.kCloseDriveRD, DriveConstants.kPPMaxVelocity);
+        return applyRequest(() -> request).until(request::isFinished);
+    }
+
+    public Command driveToPose(Pose2d pose)
+    {
+        return Commands.sequence(pathfindToPose(pose), closeDriveToPose(pose));
+    }
+
+    public Command driveAtRobotRelativeSpeeds(ChassisSpeeds speeds)
+    {
+        SwerveRequest.RobotCentric request = new SwerveRequest.RobotCentric()
+                .withDriveRequestType(DriveRequestType.OpenLoopVoltage).withVelocityX(speeds.vxMetersPerSecond)
+                .withVelocityY(speeds.vyMetersPerSecond).withRotationalRate(speeds.omegaRadiansPerSecond);
+        return applyRequest(() -> request);
+    }
+
+    public Command goForward(double speed)
+    {
+        return driveAtRobotRelativeSpeeds(new ChassisSpeeds(speed, 0, 0));
+    }
+
+    public Command goBackward(double speed)
+    {
+        return driveAtRobotRelativeSpeeds(new ChassisSpeeds(-speed, 0, 0));
+    }
+
+    public Command strafeLeft(double speed)
+    {
+        return driveAtRobotRelativeSpeeds(new ChassisSpeeds(0, -speed, 0));
+    }
+
+    public Command strafeRight(double speed)
+    {
+        return driveAtRobotRelativeSpeeds(new ChassisSpeeds(0, speed, 0));
     }
 }
