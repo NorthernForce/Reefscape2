@@ -16,12 +16,12 @@
     },
     {
       "anchor": {
-        "x": 3.4800852272727276,
-        "y": 5.445951704545455
+        "x": 3.788114754098361,
+        "y": 5.5414446721311466
       },
       "prevControl": {
-        "x": 2.716294588686109,
-        "y": 6.154484633594392
+        "x": 3.0243241155117424,
+        "y": 6.249977601180084
       },
       "nextControl": null,
       "isLocked": false,
@@ -34,14 +34,18 @@
   "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 2.5,
-    "maxAcceleration": 2.5,
+    "maxAcceleration": 1.6,
     "maxAngularVelocity": 360.0,
     "maxAngularAcceleration": 270.0,
     "nominalVoltage": 12.0,
     "unlimited": false
   },
   "goalEndState": {
-    "velocity": 0.5,
+<<<<<<< Updated upstream
+    "velocity": 0.4,
+=======
+    "velocity": 0.25,
+>>>>>>> Stashed changes
     "rotation": -59.99999999999999
   },
   "reversed": false,
@@ -50,5 +54,5 @@
     "velocity": 0,
     "rotation": -54.0
   },
-  "useDefaultConstraints": true
+  "useDefaultConstraints": false
 }

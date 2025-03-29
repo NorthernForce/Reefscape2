@@ -12,7 +12,6 @@ import org.photonvision.simulation.VisionSystemSim;
 import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.RobotBase;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.FieldConstants;
 import frc.robot.RobotConstants.CameraConstants;
@@ -34,7 +33,9 @@ public class Localizer extends SubsystemBase
 
     public Localizer()
     {
-        frontLeftPoseEstimator.setMultiTagFallbackStrategy(PoseStrategy.PNP_DISTANCE_TRIG_SOLVE);
+        frontLeftPoseEstimator.setMultiTagFallbackStrategy(PoseStrategy.CLOSEST_TO_REFERENCE_POSE);
+        frontRightPoseEstimator.setMultiTagFallbackStrategy(PoseStrategy.CLOSEST_TO_REFERENCE_POSE);
+        centerPoseEstimator.setMultiTagFallbackStrategy(PoseStrategy.CLOSEST_TO_REFERENCE_POSE);
         if (RobotBase.isSimulation())
         {
             sim = new VisionSystemSim("main-vision");
@@ -53,10 +54,6 @@ public class Localizer extends SubsystemBase
         frontLeftPoseEstimator.setReferencePose(pose);
         frontRightPoseEstimator.setReferencePose(pose);
         centerPoseEstimator.setReferencePose(pose);
-        double timestamp = Timer.getFPGATimestamp();
-        frontLeftPoseEstimator.addHeadingData(timestamp, pose.getRotation());
-        frontRightPoseEstimator.addHeadingData(timestamp, pose.getRotation());
-        centerPoseEstimator.addHeadingData(timestamp, pose.getRotation());
         if (RobotBase.isSimulation())
         {
             sim.update(pose);

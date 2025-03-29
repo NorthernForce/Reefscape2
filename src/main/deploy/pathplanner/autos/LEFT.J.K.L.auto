@@ -68,9 +68,22 @@
           }
         },
         {
-          "type": "named",
+          "type": "race",
           "data": {
-            "name": "Intake"
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "Intake"
+                }
+              },
+              {
+                "type": "wait",
+                "data": {
+                  "waitTime": 0.4
+                }
+              }
+            ]
           }
         },
         {
@@ -84,9 +97,22 @@
                 }
               },
               {
-                "type": "named",
+                "type": "sequential",
                 "data": {
-                  "name": "GoToL4Goal"
+                  "commands": [
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "Intake"
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "GoToL4Goal"
+                      }
+                    }
+                  ]
                 }
               }
             ]
@@ -137,9 +163,22 @@
           }
         },
         {
-          "type": "named",
+          "type": "race",
           "data": {
-            "name": "Intake"
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "Intake"
+                }
+              },
+              {
+                "type": "wait",
+                "data": {
+                  "waitTime": 0.4
+                }
+              }
+            ]
           }
         },
         {
@@ -153,9 +192,22 @@
                 }
               },
               {
-                "type": "named",
+                "type": "sequential",
                 "data": {
-                  "name": "GoToL4Goal"
+                  "commands": [
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "Intake"
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "GoToL4Goal"
+                      }
+                    }
+                  ]
                 }
               }
             ]
@@ -168,7 +220,7 @@
               {
                 "type": "wait",
                 "data": {
-                  "waitTime": 1.0
+                  "waitTime": 0.75
                 }
               },
               {

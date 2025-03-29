@@ -36,6 +36,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
+import frc.robot.RobotConstants;
 import frc.robot.RobotConstants.DriveConstants;
 import frc.robot.generated.TunerConstants;
 import frc.robot.generated.TunerConstants.TunerSwerveDrivetrain;
@@ -341,7 +342,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         return applyRequest(() -> fieldCentric
                 .withVelocityX(forward.getAsDouble() * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond))
                 .withVelocityY(strafe.getAsDouble() * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond))
-                .withRotationalRate(rotation.getAsDouble()));
+                .withRotationalRate(rotation.getAsDouble()
+                        * RobotConstants.DriveConstants.kMaxAngularVelocity.in(RadiansPerSecond)));
     }
 
     public Pose2d getPose()
@@ -397,12 +399,12 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     public Command strafeLeft(double speed)
     {
-        return driveAtRobotRelativeSpeeds(new ChassisSpeeds(0, -speed, 0));
+        return driveAtRobotRelativeSpeeds(new ChassisSpeeds(0, speed, 0));
     }
 
     public Command strafeRight(double speed)
     {
-        return driveAtRobotRelativeSpeeds(new ChassisSpeeds(0, speed, 0));
+        return driveAtRobotRelativeSpeeds(new ChassisSpeeds(0, -speed, 0));
     }
 
     private Angle resetEncoderAngle(int moduleIdx, Angle targetAngle)

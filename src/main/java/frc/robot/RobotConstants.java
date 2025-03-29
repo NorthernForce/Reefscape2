@@ -36,12 +36,12 @@ public class RobotConstants
 {
     public static class DriveConstants
     {
-        public static final double kPPDriveTP = 10.0;
+        public static final double kPPDriveTP = 2.9;
         public static final double kPPDriveTI = 0.0;
         public static final double kPPDriveTD = 0.0;
         public static final PIDConstants kPPDrivePID = new PIDConstants(kPPDriveTP, kPPDriveTI, kPPDriveTD);
 
-        public static final double kPPDriveRP = 7.0;
+        public static final double kPPDriveRP = 5.0;
         public static final double kPPDriveRI = 0.0;
         public static final double kPPDriveRD = 0.0;
         public static final PIDConstants kPPDriveRPID = new PIDConstants(kPPDriveRP, kPPDriveRI, kPPDriveRD);
@@ -51,7 +51,7 @@ public class RobotConstants
         public static final AngularVelocity kMaxAngularVelocity = RadiansPerSecond
                 .of(TunerConstants.kSpeedAt12Volts.in(MetersPerSecond) / kDriveRadius.in(Meters));
 
-        public static final LinearVelocity kPPMaxVelocity = MetersPerSecond.of(3.0);
+        public static final LinearVelocity kPPMaxVelocity = MetersPerSecond.of(3.5);
         public static final LinearAcceleration kPPMaxAcceleration = MetersPerSecondPerSecond.of(3.0);
         public static final AngularVelocity kPPMaxAngularVelocity = RadiansPerSecond.of(3.0);
         public static final AngularAcceleration kPPMaxAngularAcceleration = RadiansPerSecondPerSecond.of(3.0);
@@ -63,11 +63,11 @@ public class RobotConstants
         public static final double kCloseDriveTI = 0.0;
         public static final double kCloseDriveTD = 0.0;
 
-        public static final double kCloseDriveRP = 5.0;
+        public static final double kCloseDriveRP = 5;
         public static final double kCloseDriveRI = 0.0;
         public static final double kCloseDriveRD = 0.0;
 
-        public static final Translation2d kPlacingOffset = new Translation2d(Inches.of(2.5), Inches.of(-9.75));
+        public static final Translation2d kPlacingOffset = new Translation2d(Inches.of(2.5), Inches.of(-10.75));
         public static final Angle[] SWERVE_MODULE_OFFSETS =
         { Rotations.of(Preferences.getDouble("kSwerveOffsetFrontLeft", TunerConstants.FrontLeft.EncoderOffset)),
                 Rotations.of(Preferences.getDouble("kSwerveOffsetFrontRight", TunerConstants.FrontRight.EncoderOffset)),
@@ -105,7 +105,7 @@ public class RobotConstants
     public static class ElevatorConstants
     {
         public static final double kHomingSpeed = 0.25;
-        public static final Distance kTolerance = Inches.of(0.1);
+        public static final Distance kTolerance = Inches.of(0.5);
     }
 
     public static class InnerElevatorConstants
@@ -124,11 +124,11 @@ public class RobotConstants
         public static final double kI = 0.0;
         public static final double kD = 0;
         public static final double kG = 0.21;
-        public static final double kCruiseVelocity = 500;
-        public static final double kAcceleration = 50;
+        public static final double kCruiseVelocity = 160;
+        public static final double kAcceleration = 0;
         public static final double kJerk = 0;
         public static final Distance kLowerLimit = Inches.of(0.0);
-        public static final Distance kUpperLimit = Inches.of(25.0);
+        public static final Distance kUpperLimit = Inches.of(24.8);
 
         public static final Mass kInnerElevatorMass = Pounds.of(6.0);
 
@@ -153,11 +153,11 @@ public class RobotConstants
         public static final double kI = 0;
         public static final double kD = 0;
         public static final double kG = 0.31;
-        public static final double kCruiseVelocity = 500;
-        public static final double kAcceleration = 50;
+        public static final double kCruiseVelocity = 160;
+        public static final double kAcceleration = 0;
         public static final double kJerk = 0;
         public static final Distance kLowerLimit = Inches.of(0.0);
-        public static final Distance kUpperLimit = Inches.of(26.5);
+        public static final Distance kUpperLimit = Inches.of(26.8);
 
         public static final Mass kOuterElevatorMass = Pounds.of(14.0);
 
