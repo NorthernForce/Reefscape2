@@ -32,6 +32,7 @@ import frc.robot.RobotConstants.SuperstructureGoal;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.algae_extractor.AlgaeExtractor;
 import frc.robot.subsystems.apriltags.Localizer;
+import frc.robot.subsystems.climber.Climber;
 import frc.robot.subsystems.drive.CommandSwerveDrivetrain;
 import frc.robot.subsystems.manipulator.Manipulator;
 import frc.robot.subsystems.superstructure.Superstructure;
@@ -43,11 +44,14 @@ public class RobotContainer
     private final SendableChooser<Command> autonomousChooser;
     private final Localizer localizer = new Localizer();
     private final Manipulator manipulator = new Manipulator();
+    private final Climber climber;
     private final Superstructure superstructure;
     private final AlgaeExtractor algaeExtractor;
 
     public RobotContainer()
     {
+        climber = new Climber(RobotConstants.ClimberConstants.kId, RobotConstants.ClimberConstants.kClimbSpeed,
+                RobotConstants.ClimberConstants.kInverted);
         drive = TunerConstants.createDrivetrain();
         superstructure = new Superstructure();
         algaeExtractor = new AlgaeExtractor(RobotConstants.AlgaeRemoverConstants.kMotorId,
@@ -120,6 +124,8 @@ public class RobotContainer
         manipulatorController.leftTrigger().whileTrue(algaeExtractor.getExtractCommand());
 
         algaeExtractor.setDefaultCommand(algaeExtractor.getReturnCommand());
+        driverController.a().whileTrue(climber.getExtendCommand());
+        driverController.b().whileTrue(climber.getRetractCommand());
 
         NamedCommands.registerCommand("DriveToCloseLeft", driveToReefLeft());
         NamedCommands.registerCommand("DriveToCloseRight", driveToReefRight());
