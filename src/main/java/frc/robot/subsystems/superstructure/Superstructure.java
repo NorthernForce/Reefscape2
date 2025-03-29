@@ -27,8 +27,8 @@ public class Superstructure extends SubsystemBase
 
     public Superstructure()
     {
-        innerElevator = new Elevator(14, 1, InnerElevatorConstants.kConfig);
-        outerElevator = new Elevator(15, 0, OuterElevatorConstants.kConfig);
+        innerElevator = new Elevator(15, 0, InnerElevatorConstants.kConfig);
+        outerElevator = new Elevator(14, 1, OuterElevatorConstants.kConfig);
         goal = SuperstructureGoal.START;
     }
 

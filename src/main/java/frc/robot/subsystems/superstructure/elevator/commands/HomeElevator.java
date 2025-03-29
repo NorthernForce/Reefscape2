@@ -18,6 +18,11 @@ public class HomeElevator extends Command
     public void initialize()
     {
         elevator.ignoreBottomLimit();
+    }
+
+    @Override
+    public void execute()
+    {
         elevator.set(-ElevatorConstants.kHomingSpeed);
     }
 
@@ -32,6 +37,6 @@ public class HomeElevator extends Command
     @Override
     public boolean isFinished()
     {
-        return elevator.isAtBottomLimit();
+        return false;// elevator.isAtBottomLimit();
     }
 }

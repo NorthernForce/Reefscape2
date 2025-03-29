@@ -15,6 +15,7 @@ import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 
 import edu.wpi.first.epilogue.Logged;
+import edu.wpi.first.epilogue.NotLogged;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -34,9 +35,7 @@ import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.apriltags.Localizer;
 import frc.robot.subsystems.drive.CommandSwerveDrivetrain;
 import frc.robot.subsystems.manipulator.Manipulator;
-import frc.robot.subsystems.manipulator.commands.IntakeWhileWaiting;
 import frc.robot.subsystems.manipulator.commands.Outtake;
-import frc.robot.subsystems.manipulator.commands.Purge;
 import frc.robot.subsystems.superstructure.Superstructure;
 
 @Logged
@@ -120,6 +119,7 @@ public class RobotContainer
         NamedCommands.registerCommand("GoToIntake", superstructure.moveToIntake());
     }
 
+    @NotLogged
     public Command getAutonomousCommand()
     {
         return autonomousChooser.getSelected();
@@ -150,11 +150,13 @@ public class RobotContainer
         return FieldConstants.applyOffset(pose, DriveConstants.kPlacingOffset);
     }
 
+    @NotLogged
     public Command driveToReefLeft()
     {
         return Commands.defer(() -> drive.driveToPose(applyPlacingOffset(getNearestReefSide().left())), Set.of(drive));
     }
 
+    @NotLogged
     public Command driveToReefRight()
     {
         return Commands.defer(() -> drive.driveToPose(applyPlacingOffset(getNearestReefSide().right())), Set.of(drive));
@@ -183,6 +185,7 @@ public class RobotContainer
                 () -> drive.resetPose(FieldConstants.convertPoseByAlliance(new Pose2d(0, 0, Rotation2d.k180deg))));
     }
 
+    @NotLogged
     public SendableChooser<Command> getAutonomousChooser()
     {
         SendableChooser<Command> chooser = new SendableChooser<>();

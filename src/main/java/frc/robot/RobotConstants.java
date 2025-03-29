@@ -128,12 +128,12 @@ public class RobotConstants
         public static final double kAcceleration = 50;
         public static final double kJerk = 0;
         public static final Distance kLowerLimit = Inches.of(0.0);
-        public static final Distance kUpperLimit = Inches.of(24.3);
+        public static final Distance kUpperLimit = Inches.of(25.0);
 
         public static final Mass kInnerElevatorMass = Pounds.of(6.0);
 
         public static final ElevatorConfig kConfig = new ElevatorConfig(kS, kV, kA, kP, kI, kD, kG, kCruiseVelocity,
-                kAcceleration, kJerk, kSprocketCircumference, kGearBoxRatio, false, kLowerLimit, kUpperLimit,
+                kAcceleration, kJerk, kSprocketCircumference, kGearBoxRatio, true, kLowerLimit, kUpperLimit,
                 kInnerElevatorMass);
     }
 
@@ -162,7 +162,7 @@ public class RobotConstants
         public static final Mass kOuterElevatorMass = Pounds.of(14.0);
 
         public static final ElevatorConfig kConfig = new ElevatorConfig(kS, kV, kA, kP, kI, kD, kG, kCruiseVelocity,
-                kAcceleration, kJerk, kSprocketCircumference, kGearBoxRatio, true, kLowerLimit, kUpperLimit,
+                kAcceleration, kJerk, kSprocketCircumference, kGearBoxRatio, false, kLowerLimit, kUpperLimit,
                 kOuterElevatorMass);
     }
 
