@@ -1,5 +1,6 @@
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
@@ -11,7 +12,10 @@ import static edu.wpi.first.units.Units.Volts;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.path.PathConstraints;
 
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
@@ -56,5 +60,20 @@ public class RobotConstants
         public static final double kCloseDriveRD = 0.0;
 
         public static final Translation2d kPlacingOffset = new Translation2d(Inches.of(2.5), Inches.of(-9.75));
+    }
+
+    public static class CameraConstants
+    {
+        public static final Transform3d kFrontRightCameraTransform = new Transform3d(
+                new Translation3d(Inches.of(15.0 - 3.0), Inches.of(-(15.0 - 7.5)), Inches.of(8.5)),
+                new Rotation3d(Degrees.zero(), Degrees.zero(), Degrees.zero()));
+
+        public static final Transform3d kFrontLeftCameraTransform = new Transform3d(
+                new Translation3d(Inches.of(15.0 - 3.0), Inches.of(15.0 - 7.75), Inches.of(8.5)),
+                new Rotation3d(Degrees.zero(), Degrees.of(-22.1), Degrees.of(53.4)));
+
+        public static final Transform3d kCenterCameraTransform = new Transform3d(
+                new Translation3d(Inches.of(15.0 - 2.5), Inches.zero(), Inches.of(9.5)),
+                new Rotation3d(Degrees.zero(), Degrees.of(-22.4), Degrees.zero()));
     }
 }

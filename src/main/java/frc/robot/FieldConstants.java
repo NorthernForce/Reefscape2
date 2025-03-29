@@ -1,5 +1,7 @@
 package frc.robot;
 
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -243,4 +245,7 @@ public class FieldConstants
                     || Math.abs(degrees - CoralRotations.BLUE_RIGHT.getDegrees()) <= 10;
         }
     }
+
+    public static final AprilTagFieldLayout kField = AprilTagFieldLayout
+            .loadField(AprilTagFields.k2025ReefscapeAndyMark);
 }

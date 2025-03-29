@@ -14,6 +14,7 @@ import com.pathplanner.lib.commands.PathPlannerAuto;
 
 import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.measure.Distance;
@@ -25,6 +26,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.FieldConstants.ReefSide;
 import frc.robot.RobotConstants.DriveConstants;
 import frc.robot.generated.TunerConstants;
+import frc.robot.subsystems.apriltags.Localizer;
 import frc.robot.subsystems.drive.CommandSwerveDrivetrain;
 
 @Logged
@@ -32,6 +34,7 @@ public class RobotContainer
 {
     private final CommandSwerveDrivetrain drive;
     private final SendableChooser<Command> autonomousChooser;
+    private final Localizer localizer = new Localizer();
 
     public RobotContainer()
     {
@@ -147,5 +150,15 @@ public class RobotContainer
         chooser.addOption("RIGHT.E.D.C", new PathPlannerAuto("RIGHT.E.D.C"));
         chooser.addOption("CENTER.PLACE.G", new PathPlannerAuto("CENTER.PLACE.G"));
         return chooser;
+    }
+
+    public void periodic()
+    {
+        localizer.updateWithReferencePose(drive.getPose());
+        for (var pose : localizer.getEstimatedPoses())
+        {
+            drive.addVisionMeasurement(pose.estimatedPose.toPose2d(), pose.timestampSeconds,
+                    VecBuilder.fill(0.9, 0.9, 999999));
+        }
     }
 }
