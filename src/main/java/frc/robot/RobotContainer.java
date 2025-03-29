@@ -49,6 +49,7 @@ public class RobotContainer
         autonomousChooser = getAutonomousChooser();
         SmartDashboard.putData("AutonomousChooser", autonomousChooser);
         SmartDashboard.putData("Test Left Reef", driveToReefLeft());
+        SmartDashboard.putData("Reset Encoders", drive.resetEncoders());
     }
 
     private static DoubleSupplier processJoystick(DoubleSupplier joystick)
