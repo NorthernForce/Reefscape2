@@ -32,10 +32,10 @@ import frc.robot.FieldConstants.ReefSide;
 import frc.robot.RobotConstants.DriveConstants;
 import frc.robot.RobotConstants.SuperstructureGoal;
 import frc.robot.generated.TunerConstants;
+import frc.robot.subsystems.algae_extractor.AlgaeExtractor;
 import frc.robot.subsystems.apriltags.Localizer;
 import frc.robot.subsystems.drive.CommandSwerveDrivetrain;
 import frc.robot.subsystems.manipulator.Manipulator;
-import frc.robot.subsystems.manipulator.commands.Outtake;
 import frc.robot.subsystems.superstructure.Superstructure;
 
 @Logged
@@ -46,11 +46,16 @@ public class RobotContainer
     private final Localizer localizer = new Localizer();
     private final Manipulator manipulator = new Manipulator();
     private final Superstructure superstructure;
+    private final AlgaeExtractor algaeExtractor;
 
     public RobotContainer()
     {
         drive = TunerConstants.createDrivetrain();
         superstructure = new Superstructure();
+        algaeExtractor = new AlgaeExtractor(RobotConstants.AlgaeRemoverConstants.kMotorId,
+                RobotConstants.AlgaeRemoverConstants.kSensorId, RobotConstants.AlgaeRemoverConstants.kInverted,
+                RobotConstants.AlgaeRemoverConstants.kGearRatio, RobotConstants.AlgaeRemoverConstants.kRemovingSpeed,
+                RobotConstants.AlgaeRemoverConstants.kReturningSpeed);
         configureBindings();
         autonomousChooser = getAutonomousChooser();
         SmartDashboard.putData("AutonomousChooser", autonomousChooser);
@@ -75,10 +80,8 @@ public class RobotContainer
         drive.setDefaultCommand(drive.driveByJoystick(processJoystick(driverController::getLeftY),
                 processJoystick(driverController::getLeftX), processJoystick(driverController::getRightX)));
 
-        // manipulator.setDefaultCommand(
-        // new IntakeWhileWaiting(manipulator).andThen(new
-        // Purge(manipulator).withTimeout(Seconds.of(0.2)))
-        // .andThen(new IntakeWhileWaiting(manipulator, 0.2)));
+        manipulator.setDefaultCommand(manipulator.intake().andThen(manipulator.purge().withTimeout(Seconds.of(0.2)))
+                .andThen(manipulator.intakeWhileWaiting(0.2)));
 
         driverController.back().onTrue(drive.resetOrientation());
 
@@ -94,9 +97,13 @@ public class RobotContainer
 
         manipulatorController.rightTrigger()
                 .whileTrue(Commands.either(
-                        new Outtake(manipulator).withTimeout(Seconds.of(0.2))
-                                .andThen(drive.strafeRight(0.3).withTimeout(0.5)),
-                        new Outtake(manipulator), () -> superstructure.isAtHeight(SuperstructureGoal.L1.getState())));
+                        manipulator.outtake(RobotConstants.ManipulatorConstants.kSlowOuttakeSpeed)
+                                .withTimeout(Seconds.of(0.2)).andThen(drive.strafeRight(0.3).withTimeout(0.5)),
+                        manipulator.outtake(), () -> superstructure.isAtHeight(SuperstructureGoal.L1.getState())));
+
+        manipulatorController.leftTrigger().whileTrue(algaeExtractor.getExtractCommand());
+
+        algaeExtractor.setDefaultCommand(algaeExtractor.getReturnCommand());
 
         NamedCommands.registerCommand("DriveToCloseLeft", driveToReefLeft());
         NamedCommands.registerCommand("DriveToCloseRight", driveToReefRight());

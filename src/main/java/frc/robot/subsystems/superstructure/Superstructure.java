@@ -11,6 +11,7 @@ import frc.robot.RobotConstants.ElevatorConstants;
 import frc.robot.RobotConstants.InnerElevatorConstants;
 import frc.robot.RobotConstants.OuterElevatorConstants;
 import frc.robot.RobotConstants.SuperstructureGoal;
+import frc.robot.subsystems.superstructure.commands.HomeSuperstructure;
 import frc.robot.subsystems.superstructure.commands.MoveByJoystick;
 import frc.robot.subsystems.superstructure.commands.MoveToState;
 import frc.robot.subsystems.superstructure.elevator.Elevator;
@@ -107,6 +108,6 @@ public class Superstructure extends SubsystemBase
 
     public Command getHomingCommand()
     {
-        return outerElevator.home().alongWith(innerElevator.home());
+        return new HomeSuperstructure(this);
     }
 }

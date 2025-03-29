@@ -30,13 +30,13 @@ public class HomeElevator extends Command
     public void end(boolean interrupted)
     {
         elevator.stop();
-        elevator.resetPosition();
+        // elevator.resetPosition();
         elevator.useBottomLimit();
     }
 
     @Override
     public boolean isFinished()
     {
-        return false;// elevator.isAtBottomLimit();
+        return elevator.isAtBottomLimit();
     }
 }
