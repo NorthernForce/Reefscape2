@@ -26,6 +26,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.FieldConstants.ReefSide;
 import frc.robot.RobotConstants.DriveConstants;
+import frc.robot.RobotConstants.SuperstructureGoal;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.apriltags.Localizer;
 import frc.robot.subsystems.drive.CommandSwerveDrivetrain;
@@ -87,7 +88,11 @@ public class RobotContainer
 
         manipulatorController.rightBumper().whileTrue(drive.strafeRight(0.4));
 
-        manipulatorController.rightTrigger().whileTrue(new Outtake(manipulator));
+        manipulatorController.rightTrigger()
+                .whileTrue(Commands.either(
+                        new Outtake(manipulator).withTimeout(Seconds.of(0.2))
+                                .andThen(drive.strafeRight(0.3).withTimeout(0.5)),
+                        new Outtake(manipulator), () -> superstructure.isAtHeight(SuperstructureGoal.L1.getState())));
 
         NamedCommands.registerCommand("DriveToCloseLeft", driveToReefLeft());
         NamedCommands.registerCommand("DriveToCloseRight", driveToReefRight());
@@ -97,9 +102,9 @@ public class RobotContainer
 
         manipulatorController.a().onTrue(superstructure.moveToIntake().withTimeout(1.75));
         manipulatorController.povDown().onTrue(superstructure.moveToL4().withTimeout(1.75));
-        manipulatorController.povLeft().onTrue(superstructure.moveToL3().withTimeout(1.75));
+        manipulatorController.povRight().onTrue(superstructure.moveToL3().withTimeout(1.75));
         manipulatorController.povUp().onTrue(superstructure.moveToL2().withTimeout(1.75));
-        manipulatorController.povRight().onTrue(superstructure.moveToL1().withTimeout(1.75));
+        manipulatorController.povLeft().onTrue(superstructure.moveToL1().withTimeout(1.75));
 
         NamedCommands.registerCommand("GoToL4Goal", superstructure.moveToL4());
         NamedCommands.registerCommand("GoToL3Goal", superstructure.moveToL3());
