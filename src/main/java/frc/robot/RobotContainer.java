@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Seconds;
 
@@ -17,7 +18,9 @@ import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -53,6 +56,7 @@ public class RobotContainer
         autonomousChooser = getAutonomousChooser();
         SmartDashboard.putData("AutonomousChooser", autonomousChooser);
         SmartDashboard.putData("Test Left Reef", driveToReefLeft());
+        SmartDashboard.putData("Reset Encoders", drive.resetEncoders());
     }
 
     private static DoubleSupplier processJoystick(DoubleSupplier joystick)
@@ -198,5 +202,21 @@ public class RobotContainer
             drive.addVisionMeasurement(pose.estimatedPose.toPose2d(), pose.timestampSeconds,
                     VecBuilder.fill(0.9, 0.9, 999999));
         }
+    }
+
+    public Pose3d[] getComponentPoses()
+    {
+        return new Pose3d[]
+        { new Pose3d(Inches.zero(), Inches.zero(), superstructure.getOuterElevator().getHeight(), Rotation3d.kZero),
+                new Pose3d(Inches.zero(), Inches.zero(),
+                        superstructure.getInnerElevator().getHeight()
+                                .plus(superstructure.getOuterElevator().getHeight()),
+                        Rotation3d.kZero),
+                Pose3d.kZero, Pose3d.kZero };
+    }
+
+    public Pose3d getRobotPose3d()
+    {
+        return new Pose3d(drive.getPose());
     }
 }
