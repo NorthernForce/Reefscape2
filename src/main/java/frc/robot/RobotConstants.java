@@ -93,6 +93,7 @@ public class RobotConstants
         public static final int kSensorId = 2;
 
     }
+
     public static class ClimberConstants
     {
         public static final int kId = 17;
@@ -204,4 +205,9 @@ public class RobotConstants
         public static final boolean kInverted = false;
     }
 
+    public static class LEDConstants
+    {
+        public static final int kCANId = 30;
+        public static final int kLEDCount = 60;
+    }
 }

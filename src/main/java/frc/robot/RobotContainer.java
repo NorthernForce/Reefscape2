@@ -34,6 +34,7 @@ import frc.robot.subsystems.algae_extractor.AlgaeExtractor;
 import frc.robot.subsystems.apriltags.Localizer;
 import frc.robot.subsystems.climber.Climber;
 import frc.robot.subsystems.drive.CommandSwerveDrivetrain;
+import frc.robot.subsystems.leds.LEDS;
 import frc.robot.subsystems.manipulator.Manipulator;
 import frc.robot.subsystems.superstructure.Superstructure;
 
@@ -47,6 +48,7 @@ public class RobotContainer
     private final Climber climber;
     private final Superstructure superstructure;
     private final AlgaeExtractor algaeExtractor;
+    private final LEDS leds;
 
     public RobotContainer()
     {
@@ -63,6 +65,7 @@ public class RobotContainer
         SmartDashboard.putData("AutonomousChooser", autonomousChooser);
         SmartDashboard.putData("Test Left Reef", driveToReefLeft());
         SmartDashboard.putData("Reset Encoders", drive.resetEncoders());
+        leds = new LEDS(RobotConstants.LEDConstants.kCANId, RobotConstants.LEDConstants.kLEDCount);
     }
 
     private static DoubleSupplier processJoystick(DoubleSupplier joystick)
