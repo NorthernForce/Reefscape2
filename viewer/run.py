@@ -51,8 +51,7 @@ while True:
 
     prev_lines = list(filter(lambda pl: start_time-pl[0] < time_thresh, prev_lines))
 
-    # frames = aligner.process(pipe.wait_for_frames())
-    frames = pipe.wait_for_frames()
+    frames = aligner.process(pipe.wait_for_frames())
     depth = colorizer.colorize(hff.process(frames.get_depth_frame()))
     color = frames.get_color_frame()
 
