@@ -9,8 +9,6 @@ import static edu.wpi.first.units.Units.Meters;
 import java.util.Set;
 import java.util.function.DoubleSupplier;
 
-import com.ctre.phoenix.led.CANdle;
-import com.ctre.phoenix.led.RainbowAnimation;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 
@@ -23,6 +21,7 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -36,6 +35,7 @@ import frc.robot.subsystems.algae_extractor.AlgaeExtractor;
 import frc.robot.subsystems.apriltags.Localizer;
 import frc.robot.subsystems.climber.Climber;
 import frc.robot.subsystems.drive.CommandSwerveDrivetrain;
+import frc.robot.subsystems.leds.LEDS;
 import frc.robot.subsystems.manipulator.Manipulator;
 import frc.robot.subsystems.superstructure.Superstructure;
 import frc.robot.subsystems.vision.Vision;
@@ -51,8 +51,8 @@ public class RobotContainer
     private final Superstructure superstructure;
     private final AlgaeExtractor algaeExtractor;
     private final Vision vision;
-
-    private final CANdle candle;
+    
+    private final LEDS leds;
 
     public RobotContainer()
     {
@@ -70,7 +70,7 @@ public class RobotContainer
         SmartDashboard.putData("AutonomousChooser", autonomousChooser);
         SmartDashboard.putData("Test Left Reef", driveToReefLeft());
         SmartDashboard.putData("Reset Encoders", drive.resetEncoders());
-        candle = new CANdle(30);
+        leds = new LEDS(RobotConstants.LEDConstants.kCANId, RobotConstants.LEDConstants.kLEDCount);
     }
 
     private static DoubleSupplier processJoystick(DoubleSupplier joystick)
@@ -252,7 +252,23 @@ public class RobotContainer
                     VecBuilder.fill(0.9, 0.9, 999999));
         }
         manipulator.setCanIntake(superstructure.isAtHeight(SuperstructureGoal.CORAL_STATION.getState()));
-        candle.animate(new RainbowAnimation());
+
+        if (manipulator.hasCoral() && !DriverStation.isDisabled())
+        {
+            leds.setLEDState(LEDS.GameState.HASPIECE);
+        } else if (!manipulator.hasCoral() && !DriverStation.isDisabled())
+        {
+            leds.setLEDState(LEDS.GameState.WANTSPIECE);
+        } else if (DriverStation.isDisabled())
+        {
+            leds.setLEDState(LEDS.GameState.AUTO);
+        } else if (DriverStation.isAutonomous())
+        {
+            leds.setLEDState(LEDS.GameState.AUTO);
+        } else if (DriverStation.getMatchTime() <= 20)
+        {
+            leds.setLEDState(LEDS.GameState.ENDGAME);
+        }
     }
 
     public Pose3d[] getComponentPoses()

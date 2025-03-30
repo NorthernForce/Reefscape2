@@ -102,7 +102,7 @@ public class RobotConstants
     public static class ClimberConstants
     {
         public static final int kId = 17;
-        public static final boolean kInverted = true;
+        public static final boolean kInverted = false;
         public static final int kEncoderId = 23;
         public static final Angle kLowerLimit = Rotations.of(-0.03);
         public static final Angle kUpperLimit = Rotations.of(0.22);
@@ -210,4 +210,9 @@ public class RobotConstants
         public static final boolean kInverted = false;
     }
 
+    public static class LEDConstants
+    {
+        public static final int kCANId = 30;
+        public static final int kLEDCount = 72;
+    }
 }
