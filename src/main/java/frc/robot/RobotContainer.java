@@ -9,6 +9,8 @@ import static edu.wpi.first.units.Units.Meters;
 import java.util.Set;
 import java.util.function.DoubleSupplier;
 
+import com.ctre.phoenix.led.CANdle;
+import com.ctre.phoenix.led.RainbowAnimation;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 
@@ -48,6 +50,8 @@ public class RobotContainer
     private final Superstructure superstructure;
     private final AlgaeExtractor algaeExtractor;
 
+    private final CANdle candle;
+
     public RobotContainer()
     {
         climber = new Climber(RobotConstants.ClimberConstants.kId, RobotConstants.ClimberConstants.kClimbSpeed,
@@ -63,6 +67,7 @@ public class RobotContainer
         SmartDashboard.putData("AutonomousChooser", autonomousChooser);
         SmartDashboard.putData("Test Left Reef", driveToReefLeft());
         SmartDashboard.putData("Reset Encoders", drive.resetEncoders());
+        candle = new CANdle(30);
     }
 
     private static DoubleSupplier processJoystick(DoubleSupplier joystick)
@@ -243,6 +248,7 @@ public class RobotContainer
                     VecBuilder.fill(0.9, 0.9, 999999));
         }
         manipulator.setCanIntake(superstructure.isAtHeight(SuperstructureGoal.CORAL_STATION.getState()));
+        candle.animate(new RainbowAnimation());
     }
 
     public Pose3d[] getComponentPoses()

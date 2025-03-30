@@ -58,7 +58,7 @@ public class RobotConstants
         public static final double kCloseDriveRI = 0.0;
         public static final double kCloseDriveRD = 0.0;
 
-        public static final Translation2d kPlacingOffset = new Translation2d(Inches.of(2.5), Inches.of(-10.75));
+        public static final Translation2d kPlacingOffset = new Translation2d(Inches.of(2.5), Inches.of(-12.25));
         public static final Angle[] SWERVE_MODULE_OFFSETS =
         { Rotations.of(Preferences.getDouble("kSwerveOffsetFrontLeft", TunerConstants.FrontLeft.EncoderOffset)),
                 Rotations.of(Preferences.getDouble("kSwerveOffsetFrontRight", TunerConstants.FrontRight.EncoderOffset)),
@@ -93,10 +93,11 @@ public class RobotConstants
         public static final int kSensorId = 2;
 
     }
+
     public static class ClimberConstants
     {
         public static final int kId = 17;
-        public static final boolean kInverted = false;
+        public static final boolean kInverted = true;
         public static final int kEncoderId = 23;
         public static final Angle kLowerLimit = Rotations.of(-0.03);
         public static final Angle kUpperLimit = Rotations.of(0.22);

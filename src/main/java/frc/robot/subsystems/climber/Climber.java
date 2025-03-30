@@ -27,6 +27,7 @@ public class Climber extends SubsystemBase
         config.MotorOutput.Inverted = (inverted ? InvertedValue.Clockwise_Positive
                 : InvertedValue.CounterClockwise_Positive);
         config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+        m_motor.getConfigurator().apply(config);
         this.m_climbSpeed = climbSpeed;
     }
 
