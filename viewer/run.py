@@ -64,13 +64,13 @@ while True:
     dist_img = cv2.rotate(dist_img_pre, cv2.ROTATE_180)
 
     thresh_img = cv2.inRange(dist_img, 0, 240)
-    thresh_img = cv2.erode(thresh_img, np.ones((5, 5)))
+    thresh_img[int((h/2)*(5/6)):, :] = 0
     skel = cv2.ximgproc.thinning(thresh_img, thinningType=cv2.ximgproc.THINNING_GUOHALL)
 
-    new_lines = cv2.HoughLinesP(skel, 3, np.pi/180, 1, None, 42, 20)
+    new_lines = cv2.HoughLinesP(skel, 3, np.pi/180, 1, None, 52, 20)
     new_lines = new_lines if new_lines is not None else []
     new_lines = list(filter(
-        lambda l: abs(atan((l[2]-l[0])/(l[3]-l[1]))) < pi/12 and abs(((l[2]+l[0])/2 - w/4)/(w/2)) < .35,
+        lambda l: abs(atan((l[2]-l[0])/(l[3]-l[1]))) < pi/12 and abs((l[2]+l[0])/2 - w/4)/(w/2) < .28,
         map(lambda l: tuple(l[0]), new_lines)))
 
     prev_lines = list(filter(lambda pl: start_time-pl[0] < time_thresh, prev_lines))
@@ -102,14 +102,14 @@ while True:
 
     offsets = list(map(lambda l: abs((l[2]+l[0])/2 - w/4 + auto_offset), avg_lines))
 
-    dbg_img = cv2.cvtColor(dist_img, cv2.COLOR_GRAY2BGR)
-    # dbg_img = cv2.resize(color_img, (w//2, h//2))
+    dbg_img = cv2.cvtColor(thresh_img, cv2.COLOR_GRAY2BGR)
     dbg_img = cv2.bitwise_or(dbg_img, cv2.merge([np.zeros_like(skel), skel, skel]))
 
     for x1, y1, x2, y2 in lines:
         dbg_img = cv2.line(dbg_img, (x1, y1), (x2, y2), (0, 0, 255), 1)
     for x1, y1, x2, y2 in avg_lines:
         dbg_img = cv2.line(dbg_img, (x1, y1), (x2, y2), (0, 255, 0), 2)
+
     in_dist = False
     x_dist = float("nan")
     if avg_lines:
