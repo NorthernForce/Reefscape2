@@ -199,7 +199,7 @@ public class RobotConstants
     {
         public static final double kRemovingSpeed = 0.8;
         public static final double kReturningSpeed = 0.2;
-        public static final double kGearRatio = 10.0;
+        public static final double kGearRatio = 70.0;
         public static final int kMotorId = 18;
         public static final int kSensorId = 3;
         public static final boolean kInverted = false;

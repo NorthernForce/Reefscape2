@@ -1,6 +1,11 @@
 package frc.robot.subsystems.manipulator;
 
+import com.ctre.phoenix6.configs.TalonFXSConfiguration;
 import com.ctre.phoenix6.hardware.TalonFXS;
+import com.ctre.phoenix6.signals.AdvancedHallSupportValue;
+import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.MotorArrangementValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Timer;
@@ -20,6 +25,15 @@ public class Manipulator extends SubsystemBase
     public Manipulator()
     {
         m_motor = new TalonFXS(RobotConstants.ManipulatorConstants.kMotorId);
+        TalonFXSConfiguration config = new TalonFXSConfiguration();
+        config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+        config.MotorOutput.Inverted = RobotConstants.ManipulatorConstants.kMotorInverted ? InvertedValue.Clockwise_Positive
+                : InvertedValue.CounterClockwise_Positive;
+        config.CurrentLimits.StatorCurrentLimit = 40;
+        config.CurrentLimits.StatorCurrentLimitEnable = true;
+        config.Commutation.MotorArrangement = MotorArrangementValue.Minion_JST;
+        config.Commutation.AdvancedHallSupport = AdvancedHallSupportValue.Enabled;
+        m_motor.getConfigurator().apply(config);
         m_sensor = new DigitalInput(RobotConstants.ManipulatorConstants.kSensorId);
     }
 
