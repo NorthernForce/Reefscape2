@@ -50,6 +50,7 @@ public class LEDS extends SubsystemBase
     private int currentAnimationTick = 0;
 
     private GameState currenState = GameState.ENDGAME;
+    private GameState prevState;
 
     public void resetLEDS()
     {
@@ -58,6 +59,7 @@ public class LEDS extends SubsystemBase
 
     public void setLEDState(GameState state)
     {
+        prevState = currenState;
         currenState = state;
     }
 
@@ -173,6 +175,7 @@ public class LEDS extends SubsystemBase
             candle.clearAnimation(i);
         }
         isAnimating = false;
+        resetLEDS();
     }
 
     public void strobe(RGB inputColour)
@@ -216,44 +219,52 @@ public class LEDS extends SubsystemBase
     public void periodic()
     {
         alliance = DriverStation.getAlliance();
-        clearAnimationBuffer();
+        // clearAnimationBuffer();
         currentAnimationTick = (int) MathUtil.inputModulus((double) (currentAnimationTick + 1), 0, 32);
-        switch (currenState)
+        if (prevState != currenState)
         {
-        case NONE:
-            if (!isAnimating)
+            switch (currenState)
             {
-                rainbowAnimation(0.5, 0.5);
-                isAnimating = true;
+            case NONE:
+                if (!isAnimating)
+                {
+                    rainbowAnimation(0.5, 0.5);
+                    isAnimating = true;
+                }
+                break;
+            case HASPIECE:
+                clearAnimationBuffer();
+                hasPiece();
+                break;
+            case WANTSPIECE:
+                clearAnimationBuffer();
+                feedParticalEffect(0.5);
+                break;
+            case READYPLACE:
+                clearAnimationBuffer();
+                readyPlace();
+                break;
+            case AUTO:
+                clearAnimationBuffer();
+                everyOther(determineRGBAlliance(alliance));
+                break;
+            case ENDGAME:
+                if (!isAnimating)
+                {
+                    resetLEDS();
+                    strobe(determineRGBAlliance(alliance));
+                    isAnimating = true;
+                }
+                break;
+            default:
+                break;
             }
-            break;
-        case HASPIECE:
-            clearAnimationBuffer();
-            hasPiece();
-            break;
-        case WANTSPIECE:
-            clearAnimationBuffer();
+        } else if (currenState == GameState.WANTSPIECE)
+        {
             feedParticalEffect(0.5);
-            break;
-        case READYPLACE:
-            clearAnimationBuffer();
-            readyPlace();
-            break;
-        case AUTO:
-            clearAnimationBuffer();
-            everyOther(determineRGBAlliance(alliance));
-            break;
-        case ENDGAME:
-            if (!isAnimating)
-            {
-                resetLEDS();
-                strobe(determineRGBAlliance(alliance));
-                isAnimating = true;
-            }
-            break;
-        default:
-            break;
         }
+
+        prevState = currenState;
 
     }
 }

@@ -251,22 +251,18 @@ public class RobotContainer
         }
         manipulator.setCanIntake(superstructure.isAtHeight(SuperstructureGoal.CORAL_STATION.getState()));
 
-        if (manipulator.hasCoral())
+        if (manipulator.hasCoral() && !DriverStation.isDisabled())
         {
             leds.setLEDState(LEDS.GameState.HASPIECE);
-        } else
+        } else if (!manipulator.hasCoral() && !DriverStation.isDisabled())
         {
             leds.setLEDState(LEDS.GameState.WANTSPIECE);
-        }
-        if (DriverStation.isDisabled())
+        } else if (DriverStation.isDisabled())
         {
             leds.setLEDState(LEDS.GameState.AUTO);
         } else if (DriverStation.isAutonomous())
         {
             leds.setLEDState(LEDS.GameState.AUTO);
-        } else if (DriverStation.isTeleop())
-        {
-            leds.setLEDState(GameState.TELEOP);
         } else if (DriverStation.getMatchTime() <= 20)
         {
             leds.setLEDState(LEDS.GameState.ENDGAME);
