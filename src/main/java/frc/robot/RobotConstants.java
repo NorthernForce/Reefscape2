@@ -208,6 +208,6 @@ public class RobotConstants
     public static class LEDConstants
     {
         public static final int kCANId = 30;
-        public static final int kLEDCount = 60;
+        public static final int kLEDCount = 72;
     }
 }
