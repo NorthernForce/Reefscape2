@@ -24,11 +24,11 @@ public class Localizer extends SubsystemBase
     private final PhotonCamera frontRightCamera = new PhotonCamera("front_left_camera");
     private final PhotonCamera centerCamera = new PhotonCamera("center_camera");
     private final PhotonPoseEstimator frontLeftPoseEstimator = new PhotonPoseEstimator(FieldConstants.kField,
-            PoseStrategy.CONSTRAINED_SOLVEPNP, CameraConstants.kFrontLeftCameraTransform);
+            PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, CameraConstants.kFrontLeftCameraTransform);
     private final PhotonPoseEstimator frontRightPoseEstimator = new PhotonPoseEstimator(FieldConstants.kField,
-            PoseStrategy.CONSTRAINED_SOLVEPNP, CameraConstants.kFrontRightCameraTransform);
+            PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, CameraConstants.kFrontRightCameraTransform);
     private final PhotonPoseEstimator centerPoseEstimator = new PhotonPoseEstimator(FieldConstants.kField,
-            PoseStrategy.CONSTRAINED_SOLVEPNP, CameraConstants.kCenterCameraTransform);
+            PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, CameraConstants.kCenterCameraTransform);
     private EstimatedRobotPose[] estimatedPoses = new EstimatedRobotPose[0];
     private Pose2d[] frontLeftPoses = new Pose2d[0];
     private Pose2d[] frontRightPoses = new Pose2d[0];

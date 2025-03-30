@@ -59,11 +59,11 @@ public class RobotConstants
         public static final double kCloseDriveRD = 0.0;
 
         // TODO: maybe tune a bit
-        public static final double kCloseDriveVP = 5;
+        public static final double kCloseDriveVP = 2.5;
         public static final double kCloseDriveVI = 0.0;
-        public static final double kCloseDriveVD = 0.0;
+        public static final double kCloseDriveVD = 0.1;
 
-        public static final Translation2d kPlacingOffset = new Translation2d(Inches.of(2.5), Inches.of(-12.25));
+        public static final Translation2d kPlacingOffset = new Translation2d(Inches.of(2.5), Inches.of(-10.25));
         public static final Angle[] SWERVE_MODULE_OFFSETS =
         { Rotations.of(Preferences.getDouble("kSwerveOffsetFrontLeft", TunerConstants.FrontLeft.EncoderOffset)),
                 Rotations.of(Preferences.getDouble("kSwerveOffsetFrontRight", TunerConstants.FrontRight.EncoderOffset)),

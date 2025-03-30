@@ -60,14 +60,17 @@ public class CloseDriveToPoseRequest implements SwerveRequest
         double vy = yPID.calculate(parameters.currentPose.getY());
         ChassisSpeeds targetSpeeds = new ChassisSpeeds(vx, vy, 0);
         var target = offsetSupplier.get();
-        if (target.isPresent() && poseGetter.get().getTranslation().getDistance(targetPose.getTranslation()) < 0.3)
-        {
-            double viewerVy = viewerPID.calculate(target.get());
-            ChassisSpeeds robotRel = ChassisSpeeds.fromFieldRelativeSpeeds(targetSpeeds,
-                    parameters.currentPose.getRotation());
-            robotRel.vyMetersPerSecond = viewerVy;
-            targetSpeeds = ChassisSpeeds.fromRobotRelativeSpeeds(robotRel, parameters.currentPose.getRotation());
-        }
+        // if (target.isPresent() &&
+        // poseGetter.get().getTranslation().getDistance(targetPose.getTranslation()) <
+        // 0.18)
+        // {
+        // double viewerVy = viewerPID.calculate(target.get());
+        // ChassisSpeeds robotRel = ChassisSpeeds.fromFieldRelativeSpeeds(targetSpeeds,
+        // parameters.currentPose.getRotation());
+        // robotRel.vyMetersPerSecond = viewerVy;
+        // targetSpeeds = ChassisSpeeds.fromRobotRelativeSpeeds(robotRel,
+        // parameters.currentPose.getRotation());
+        // }
         facingAngle.withVelocityX(MathUtil.clamp(targetSpeeds.vxMetersPerSecond, -maxVelocity.in(MetersPerSecond),
                 maxVelocity.in(MetersPerSecond)));
         facingAngle.withVelocityY(MathUtil.clamp(targetSpeeds.vyMetersPerSecond, -maxVelocity.in(MetersPerSecond),
