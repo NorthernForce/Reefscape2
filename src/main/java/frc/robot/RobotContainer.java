@@ -51,7 +51,7 @@ public class RobotContainer
     private final Superstructure superstructure;
     private final AlgaeExtractor algaeExtractor;
     private final Vision vision;
-    
+
     private final LEDS leds;
 
     public RobotContainer()

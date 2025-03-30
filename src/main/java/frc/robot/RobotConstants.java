@@ -63,7 +63,7 @@ public class RobotConstants
         public static final double kCloseDriveVI = 0.0;
         public static final double kCloseDriveVD = 0.1;
 
-        public static final Translation2d kPlacingOffset = new Translation2d(Inches.of(2.5), Inches.of(-10.25));
+        public static final Translation2d kPlacingOffset = new Translation2d(Inches.of(2.5), Inches.of(-11.75));
         public static final Angle[] SWERVE_MODULE_OFFSETS =
         { Rotations.of(Preferences.getDouble("kSwerveOffsetFrontLeft", TunerConstants.FrontLeft.EncoderOffset)),
                 Rotations.of(Preferences.getDouble("kSwerveOffsetFrontRight", TunerConstants.FrontRight.EncoderOffset)),
@@ -80,11 +80,11 @@ public class RobotConstants
 
         public static final Transform3d kFrontLeftCameraTransform = new Transform3d(
                 new Translation3d(Inches.of(15.0 - 3.0), Inches.of(15.0 - 7.75), Inches.of(8.5)),
-                new Rotation3d(Degrees.zero(), Degrees.of(-22.1), Degrees.of(53.4)));
+                new Rotation3d(Degrees.zero(), Degrees.of(-27.4), Degrees.of(53.4)));
 
         public static final Transform3d kCenterCameraTransform = new Transform3d(
                 new Translation3d(Inches.of(15.0 - 2.5), Inches.zero(), Inches.of(9.5)),
-                new Rotation3d(Degrees.zero(), Degrees.of(-22.4), Degrees.zero()));
+                new Rotation3d(Degrees.zero(), Degrees.of(-25), Degrees.zero()));
     }
 
     public static class ManipulatorConstants
