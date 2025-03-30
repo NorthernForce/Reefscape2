@@ -27,7 +27,8 @@ public class Manipulator extends SubsystemBase
         m_motor = new TalonFXS(RobotConstants.ManipulatorConstants.kMotorId);
         TalonFXSConfiguration config = new TalonFXSConfiguration();
         config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-        config.MotorOutput.Inverted = RobotConstants.ManipulatorConstants.kMotorInverted ? InvertedValue.Clockwise_Positive
+        config.MotorOutput.Inverted = RobotConstants.ManipulatorConstants.kMotorInverted
+                ? InvertedValue.Clockwise_Positive
                 : InvertedValue.CounterClockwise_Positive;
         config.CurrentLimits.StatorCurrentLimit = 40;
         config.CurrentLimits.StatorCurrentLimitEnable = true;
