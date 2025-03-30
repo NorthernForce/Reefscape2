@@ -43,7 +43,15 @@ public class LEDS extends SubsystemBase
 
     private int currentAnimationTick = 0;
 
-    private GameState currenState = GameState.WANTSPIECE;
+    private GameState currenState = GameState.HASPIECE;
+
+    public void resetLEDS() {
+        candle.setLEDs(0, 0, 0, 0, 0, ledCount);
+    }
+
+    public void setLEDState(GameState state) {
+        currenState = state;
+    }
 
     public LEDS(int CANid, int ledCount)
     {
@@ -113,6 +121,11 @@ public class LEDS extends SubsystemBase
         }
     }
 
+    public void hasPiece()
+    {
+        candle.setLEDs(255, 0, 255, 0, 0, ledCount);
+    }
+
     public void setEveryOtherColour(RGB inputColour1, RGB inputColour2)
     {
         for (int i = 0; i < ledCount; i++)
@@ -170,7 +183,7 @@ public class LEDS extends SubsystemBase
             everyOther(DriverStation.getAlliance());
             break;
         case HASPIECE:
-            setColour(new RGB(238, 10, 154));
+            hasPiece();
             break;
         case WANTSPIECE:
             feedParticalEffect(0.5);
