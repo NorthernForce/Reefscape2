@@ -1,0 +1,55 @@
+plugins {
+    id "org.hidetake.ssh" version "2.11.2"
+}
+
+ssh.settings {
+    knownHosts = allowAnyHosts
+}
+
+remotes {
+    orangepi {
+        host = findProperty("devAddr") ?: "10.1.72.14"
+        port = (findProperty("devPort") ?: 22) as int
+        user = "pi"
+        password = "raspberry"
+    }
+}
+
+task viewFilesOnly {
+    group = "Vision Deployment"
+    description = "deploy files only (quicker)"
+    doLast {
+        ssh.runInOrder {
+            session(remotes.orangepi) {
+                def dirName = project.projectDir.getName()
+                put from: project.projectDir, into: "/home/pi"
+                try {
+                    execute "sudo docker restart viewer-sys"
+                } catch (Exception e) {
+                    println "couldn't restart container (might not exist)"
+                }
+            }
+        }
+    }
+}
+
+task viewDeploy {
+    group = "Vision Deployment"
+    description = "deploy viewer system code (builds container)"
+    doLast {
+        ssh.runInOrder {
+            session(remotes.orangepi) {
+                def dirName = project.projectDir.getName()
+                put from: project.projectDir, into: "/home/pi"
+                executeScript "chmod +x ~/viewer/deploy.sh"
+                println "vision code uploaded to ~/$dirName, reloading docker."
+                try {
+                    execute "/home/pi/viewer/deploy.sh"
+                } catch (Exception e) {
+                    println "== errors during docker deploy! consider running manually and restart static networking"
+                    e.printStackTrace()
+                }
+            }
+        }
+    }
+}
