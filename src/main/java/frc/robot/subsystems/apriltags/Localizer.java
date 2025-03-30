@@ -12,6 +12,7 @@ import org.photonvision.simulation.VisionSystemSim;
 import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.FieldConstants;
 import frc.robot.RobotConstants.CameraConstants;
@@ -23,11 +24,11 @@ public class Localizer extends SubsystemBase
     private final PhotonCamera frontRightCamera = new PhotonCamera("front_left_camera");
     private final PhotonCamera centerCamera = new PhotonCamera("center_camera");
     private final PhotonPoseEstimator frontLeftPoseEstimator = new PhotonPoseEstimator(FieldConstants.kField,
-            PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, CameraConstants.kFrontLeftCameraTransform);
+            PoseStrategy.CONSTRAINED_SOLVEPNP, CameraConstants.kFrontLeftCameraTransform);
     private final PhotonPoseEstimator frontRightPoseEstimator = new PhotonPoseEstimator(FieldConstants.kField,
-            PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, CameraConstants.kFrontRightCameraTransform);
+            PoseStrategy.CONSTRAINED_SOLVEPNP, CameraConstants.kFrontRightCameraTransform);
     private final PhotonPoseEstimator centerPoseEstimator = new PhotonPoseEstimator(FieldConstants.kField,
-            PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, CameraConstants.kCenterCameraTransform);
+            PoseStrategy.CONSTRAINED_SOLVEPNP, CameraConstants.kCenterCameraTransform);
     private EstimatedRobotPose[] estimatedPoses = new EstimatedRobotPose[0];
     private final VisionSystemSim sim;
 
@@ -51,6 +52,10 @@ public class Localizer extends SubsystemBase
 
     public void updateWithReferencePose(Pose2d pose)
     {
+        double timestampSeconds = Timer.getFPGATimestamp();
+        frontLeftPoseEstimator.addHeadingData(timestampSeconds, pose.getRotation());
+        frontRightPoseEstimator.addHeadingData(timestampSeconds, pose.getRotation());
+        centerPoseEstimator.addHeadingData(timestampSeconds, pose.getRotation());
         frontLeftPoseEstimator.setReferencePose(pose);
         frontRightPoseEstimator.setReferencePose(pose);
         centerPoseEstimator.setReferencePose(pose);
