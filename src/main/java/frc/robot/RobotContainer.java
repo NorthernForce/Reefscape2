@@ -9,6 +9,8 @@ import static edu.wpi.first.units.Units.Meters;
 import java.util.Set;
 import java.util.function.DoubleSupplier;
 
+import com.ctre.phoenix.led.CANdle;
+import com.ctre.phoenix.led.RainbowAnimation;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 
@@ -246,6 +248,7 @@ public class RobotContainer
                     VecBuilder.fill(0.9, 0.9, 999999));
         }
         manipulator.setCanIntake(superstructure.isAtHeight(SuperstructureGoal.CORAL_STATION.getState()));
+        candle.animate(new RainbowAnimation());
     }
 
     public Pose3d[] getComponentPoses()
