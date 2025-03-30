@@ -2,6 +2,7 @@ package frc.robot.subsystems.drive;
 
 import static edu.wpi.first.units.Units.*;
 
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
@@ -366,17 +367,19 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         return AutoBuilder.pathfindToPose(pose, DriveConstants.kPPConstraints);
     }
 
-    public Command closeDriveToPose(Pose2d pose)
+    public Command closeDriveToPose(Pose2d pose, Supplier<Optional<Double>> offsetSupplier)
     {
         CloseDriveToPoseRequest request = new CloseDriveToPoseRequest(pose, DriveConstants.kCloseDriveTP,
                 DriveConstants.kCloseDriveTI, DriveConstants.kCloseDriveTD, DriveConstants.kCloseDriveRP,
-                DriveConstants.kCloseDriveRI, DriveConstants.kCloseDriveRD, DriveConstants.kPPMaxVelocity);
+                DriveConstants.kCloseDriveRI, DriveConstants.kCloseDriveRD, DriveConstants.kCloseDriveVP,
+                DriveConstants.kCloseDriveVI, DriveConstants.kCloseDriveVD, DriveConstants.kPPMaxVelocity,
+                () -> this.getPose(), offsetSupplier);
         return applyRequest(() -> request).until(request::isFinished);
     }
 
-    public Command driveToPose(Pose2d pose)
+    public Command driveToPose(Pose2d pose, Supplier<Optional<Double>> offsetSupplier)
     {
-        return Commands.sequence(pathfindToPose(pose), closeDriveToPose(pose));
+        return Commands.sequence(pathfindToPose(pose), closeDriveToPose(pose, offsetSupplier));
     }
 
     public Command driveAtRobotRelativeSpeeds(ChassisSpeeds speeds)

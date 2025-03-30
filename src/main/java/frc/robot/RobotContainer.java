@@ -38,6 +38,7 @@ import frc.robot.subsystems.climber.Climber;
 import frc.robot.subsystems.drive.CommandSwerveDrivetrain;
 import frc.robot.subsystems.manipulator.Manipulator;
 import frc.robot.subsystems.superstructure.Superstructure;
+import frc.robot.subsystems.vision.Vision;
 
 @Logged
 public class RobotContainer
@@ -49,6 +50,7 @@ public class RobotContainer
     private final Climber climber;
     private final Superstructure superstructure;
     private final AlgaeExtractor algaeExtractor;
+    private final Vision vision;
 
     private final CANdle candle;
 
@@ -62,6 +64,7 @@ public class RobotContainer
                 RobotConstants.AlgaeRemoverConstants.kSensorId, RobotConstants.AlgaeRemoverConstants.kInverted,
                 RobotConstants.AlgaeRemoverConstants.kGearRatio, RobotConstants.AlgaeRemoverConstants.kRemovingSpeed,
                 RobotConstants.AlgaeRemoverConstants.kReturningSpeed);
+        vision = new Vision("skynet", "Viewer");
         configureBindings();
         autonomousChooser = getAutonomousChooser();
         SmartDashboard.putData("AutonomousChooser", autonomousChooser);
@@ -193,15 +196,15 @@ public class RobotContainer
     @NotLogged
     public Command driveToReefLeft()
     {
-        return Commands.defer(() -> drive.closeDriveToPose(applyPlacingOffset(getNearestReefSide().left())),
-                Set.of(drive));
+        return Commands.defer(() -> drive.closeDriveToPose(applyPlacingOffset(getNearestReefSide().left()),
+                () -> vision.getXOffset()), Set.of(drive, vision));
     }
 
     @NotLogged
     public Command driveToReefRight()
     {
-        return Commands.defer(() -> drive.closeDriveToPose(applyPlacingOffset(getNearestReefSide().right())),
-                Set.of(drive));
+        return Commands.defer(() -> drive.closeDriveToPose(applyPlacingOffset(getNearestReefSide().right()),
+                () -> vision.getXOffset()), Set.of(drive, vision));
     }
 
     public Pose2d getNearestCoralStationPose()
@@ -213,7 +216,8 @@ public class RobotContainer
 
     public Command driveToNearestCoralStation()
     {
-        return Commands.defer(() -> drive.closeDriveToPose(getNearestCoralStationPose()), Set.of(drive));
+        return Commands.defer(() -> drive.closeDriveToPose(getNearestCoralStationPose(), () -> vision.getXOffset()),
+                Set.of(drive, vision));
     }
 
     public Command simpleLeave()
