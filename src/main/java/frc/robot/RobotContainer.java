@@ -37,6 +37,7 @@ import frc.robot.subsystems.climber.Climber;
 import frc.robot.subsystems.drive.CommandSwerveDrivetrain;
 import frc.robot.subsystems.leds.LEDS;
 import frc.robot.subsystems.manipulator.Manipulator;
+import frc.robot.subsystems.manipulator.Manipulator.ManipulatorState;
 import frc.robot.subsystems.superstructure.Superstructure;
 import frc.robot.subsystems.vision.Vision;
 
@@ -153,13 +154,14 @@ public class RobotContainer
 
         manipulatorController.start().whileTrue(superstructure.getHomingCommand());
 
-        NamedCommands.registerCommand("GoToL4Goal", superstructure.moveToL4());
-        NamedCommands.registerCommand("GoToL3Goal", superstructure.moveToL3());
-        NamedCommands.registerCommand("GoToL2Goal", superstructure.moveToL2());
-        NamedCommands.registerCommand("GoToL1Goal", superstructure.moveToL1());
+        NamedCommands.registerCommand("GoToL4Goal", superstructure.holdAtL4());
+        NamedCommands.registerCommand("GoToL3Goal", superstructure.holdAtL3());
+        NamedCommands.registerCommand("GoToL2Goal", superstructure.holdAtL2());
+        NamedCommands.registerCommand("GoToL1Goal", superstructure.holdAtL1());
         NamedCommands.registerCommand("GoToIntake", superstructure.moveToIntake());
         NamedCommands.registerCommand("Intake", manipulator.intake());
-        NamedCommands.registerCommand("Outtake", manipulator.outtake());
+        NamedCommands.registerCommand("Outtake",
+                Commands.deadline(manipulator.outtake(), superstructure.holdAtGoal(SuperstructureGoal.L4)));
     }
 
     @NotLogged
@@ -186,6 +188,16 @@ public class RobotContainer
         }
 
         return closest;
+    }
+
+    public Pose2d getLeftPose()
+    {
+        return applyPlacingOffset(getNearestReefSide().left());
+    }
+
+    public Pose2d getRightPose()
+    {
+        return applyPlacingOffset(getNearestReefSide().right());
     }
 
     public Pose2d applyPlacingOffset(Pose2d pose)
@@ -222,7 +234,7 @@ public class RobotContainer
 
     public Command simpleLeave()
     {
-        return basicAutoResetForStart().andThen(drive.goForward(0.5).withTimeout(2));
+        return basicAutoResetForStart().andThen(drive.goForward(1.0).withTimeout(2));
     }
 
     public Command basicAutoResetForStart()
@@ -243,13 +255,23 @@ public class RobotContainer
         return chooser;
     }
 
+    public void autonomousInit()
+    {
+        if (manipulator.hasCoralInSensor())
+        {
+            manipulator.setState(ManipulatorState.HAPPY);
+        } else
+        {
+            manipulator.setState(ManipulatorState.HUNGRY);
+        }
+    }
+
     public void periodic()
     {
         localizer.updateWithReferencePose(drive.getPose());
         for (var pose : localizer.getEstimatedPoses())
         {
-            drive.addVisionMeasurement(pose.estimatedPose.toPose2d(), pose.timestampSeconds,
-                    VecBuilder.fill(0.9, 0.9, 999999));
+            drive.addVisionMeasurement(pose.pose(), pose.timestamp(), VecBuilder.fill(0.9, 0.9, 999999));
         }
         manipulator.setCanIntake(superstructure.isAtHeight(SuperstructureGoal.CORAL_STATION.getState()));
 
@@ -285,5 +307,10 @@ public class RobotContainer
     public Pose3d getRobotPose3d()
     {
         return new Pose3d(drive.getPose());
+    }
+
+    public void resetPose()
+    {
+        drive.resetPose(new Pose2d());
     }
 }

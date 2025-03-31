@@ -76,6 +76,11 @@ public class Manipulator extends SubsystemBase
         return m_state;
     }
 
+    public void setState(ManipulatorState state)
+    {
+        m_state = state;
+    }
+
     @Override
     public void periodic()
     {
