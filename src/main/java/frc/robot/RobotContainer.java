@@ -17,6 +17,7 @@ import com.pathplanner.lib.commands.PathPlannerAuto;
 import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.epilogue.NotLogged;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
@@ -50,7 +51,7 @@ import frc.robot.subsystems.vision.Vision;
 public class RobotContainer
 {
     private final CommandSwerveDrivetrain drive;
-    private final SendableChooser<Command> autonomousChooser;
+    private final SendableChooser<Pair<String, Command>> autonomousChooser;
     private final Localizer localizer = new Localizer();
     private final Manipulator manipulator = new Manipulator();
     private final Climber climber;
@@ -59,6 +60,8 @@ public class RobotContainer
     private final Vision vision;
 
     private final LEDS leds;
+    
+    private boolean isRightSideAuto;
 
     public RobotContainer()
     {
@@ -141,8 +144,8 @@ public class RobotContainer
         driverController.a().whileTrue(climber.getExtendCommand());
         driverController.b().whileTrue(climber.getRetractCommand());
 
-        NamedCommands.registerCommand("DriveToCloseLeft", driveToReefLeft());
-        NamedCommands.registerCommand("DriveToCloseRight", driveToReefRight());
+        NamedCommands.registerCommand("DriveToCloseLeft", Commands.either(driveToReefRight(), driveToReefLeft(), () -> isRightSideAuto));
+        NamedCommands.registerCommand("DriveToCloseRight", Commands.either(driveToReefLeft(), driveToReefRight(), () -> isRightSideAuto));
 
         superstructure.setDefaultCommand(superstructure.moveByJoystick(processJoystick(manipulatorController::getLeftY),
                 processJoystick(manipulatorController::getRightY)));
@@ -198,7 +201,15 @@ public class RobotContainer
     @NotLogged
     public Command getAutonomousCommand()
     {
-        return autonomousChooser.getSelected();
+        if (autonomousChooser.getSelected().getFirst() == "RIGHT.E.D.C")
+        {
+            isRightSideAuto = true;
+        }
+        else
+        {
+            isRightSideAuto = false;
+        }
+        return autonomousChooser.getSelected().getSecond();
     }
 
     public Command bruteOuttake()
@@ -281,15 +292,14 @@ public class RobotContainer
     }
 
     @NotLogged
-    public SendableChooser<Command> getAutonomousChooser()
+    public SendableChooser<Pair<String, Command>> getAutonomousChooser()
     {
-        SendableChooser<Command> chooser = new SendableChooser<>();
-        chooser.setDefaultOption("Leave", simpleLeave());
-        chooser.addOption("Do nothing", Commands.print("Do nothing"));
-        chooser.addOption("PLS WORK!!!", new PathPlannerAuto("LEFT.J.K.L"));
-        chooser.addOption("PLS WORK2!!!", new PathPlannerAuto("Attempt #"));
-        chooser.addOption("RIGHT.E.D.C", new PathPlannerAuto("RIGHT.E.D.C"));
-        chooser.addOption("CENTER.PLACE.G", new PathPlannerAuto("CENTER.PLACE.G"));
+        SendableChooser<Pair<String, Command>> chooser = new SendableChooser<>();
+        chooser.setDefaultOption("Leave", Pair.of("Leave", simpleLeave()));
+        chooser.addOption("Do nothing", Pair.of("Do nothing", Commands.print("Do nothing")));
+        chooser.addOption("LEFT.J.K.L", Pair.of("LEFT.J.K.L", new PathPlannerAuto("LEFT.J.K.L")));
+        chooser.addOption("RIGHT.E.D.C", Pair.of("RIGHT.E.D.C", new PathPlannerAuto("LEFT.J.K.L", true)));
+        chooser.addOption("CENTER.PLACE.G", Pair.of("CENTER.PLACE.G", new PathPlannerAuto("CENTER.PLACE.G")));
         return chooser;
     }
 
