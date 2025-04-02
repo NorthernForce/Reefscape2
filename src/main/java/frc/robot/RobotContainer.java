@@ -25,11 +25,13 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.FieldConstants.ReefSide;
 import frc.robot.RobotConstants.DriveConstants;
 import frc.robot.RobotConstants.SuperstructureGoal;
@@ -69,12 +71,12 @@ public class RobotContainer
                 RobotConstants.AlgaeRemoverConstants.kGearRatio, RobotConstants.AlgaeRemoverConstants.kRemovingSpeed,
                 RobotConstants.AlgaeRemoverConstants.kReturningSpeed);
         vision = new Vision("skynet", "Viewer");
+        leds = new LEDS(RobotConstants.LEDConstants.kCANId, RobotConstants.LEDConstants.kLEDCount);
         configureBindings();
         autonomousChooser = getAutonomousChooser();
         SmartDashboard.putData("AutonomousChooser", autonomousChooser);
         SmartDashboard.putData("Test Left Reef", driveToReefLeft());
         SmartDashboard.putData("Reset Encoders", drive.resetEncoders());
-        leds = new LEDS(RobotConstants.LEDConstants.kCANId, RobotConstants.LEDConstants.kLEDCount);
     }
 
     private static DoubleSupplier processJoystick(DoubleSupplier joystick)
@@ -167,6 +169,30 @@ public class RobotContainer
                 Commands.deadline(manipulator.outtake().andThen(Commands.waitSeconds(0.1)), superstructure.holdAtL4()));
         NamedCommands.registerCommand("RemoveAlgae", algaeExtractor.getExtractCommand()
                 .alongWith(drive.driveAtRobotRelativeSpeeds(new ChassisSpeeds(-0.2, 0, 0)).withTimeout(2)));
+
+        leds.setDefaultCommand(leds.noAlliance());
+
+        new Trigger(
+                () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red && DriverStation.isDisabled())
+                        .whileTrue(leds.redAlliance());
+
+        new Trigger(
+                () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue && DriverStation.isDisabled())
+                        .whileTrue(leds.blueAlliance());
+
+        new Trigger(() -> DriverStation.isAutonomousEnabled()).whileTrue(leds.auto());
+
+        new Trigger(() -> DriverStation.getMatchTime() <= 20 && DriverStation.isTeleopEnabled()
+                && manipulator.hasCoral() && !vision.isAligned()).whileTrue(leds.endgame());
+
+        new Trigger(() -> DriverStation.getMatchTime() > 20 && DriverStation.isTeleopEnabled() && manipulator.hasCoral()
+                && !vision.isAligned()).whileTrue(leds.happy());
+
+        new Trigger(
+                () -> DriverStation.getMatchTime() > 20 && DriverStation.isTeleopEnabled() && !manipulator.hasCoral())
+                        .whileTrue(leds.hungry());
+
+        new Trigger(() -> DriverStation.isTeleopEnabled() && vision.isAligned()).whileTrue(leds.readyToPlace());
     }
 
     @NotLogged
@@ -286,23 +312,6 @@ public class RobotContainer
             drive.addVisionMeasurement(pose.pose(), pose.timestamp(), VecBuilder.fill(0.9, 0.9, 999999));
         }
         manipulator.setCanIntake(superstructure.isAtHeight(SuperstructureGoal.CORAL_STATION.getState()));
-
-        if (manipulator.hasCoral() && !DriverStation.isDisabled())
-        {
-            leds.setLEDState(LEDS.GameState.HASPIECE);
-        } else if (!manipulator.hasCoral() && !DriverStation.isDisabled())
-        {
-            leds.setLEDState(LEDS.GameState.WANTSPIECE);
-        } else if (DriverStation.isDisabled())
-        {
-            leds.setLEDState(LEDS.GameState.AUTO);
-        } else if (DriverStation.isAutonomous())
-        {
-            leds.setLEDState(LEDS.GameState.AUTO);
-        } else if (DriverStation.getMatchTime() <= 20)
-        {
-            leds.setLEDState(LEDS.GameState.ENDGAME);
-        }
     }
 
     public Pose3d[] getComponentPoses()

@@ -19,6 +19,7 @@ import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Mass;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.Preferences;
+import edu.wpi.first.wpilibj.util.Color;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.superstructure.Superstructure.SuperstructureState;
 import frc.robot.subsystems.superstructure.elevator.Elevator.ElevatorConfig;
@@ -214,5 +215,9 @@ public class RobotConstants
     {
         public static final int kCANId = 30;
         public static final int kLEDCount = 72;
+
+        public static final Color kTeamColor = new Color(238, 10, 154);
+
+        public static final double ledRate = 0.1;
     }
 }

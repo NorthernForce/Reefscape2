@@ -1,63 +1,43 @@
 package frc.robot.subsystems.leds;
 
-import java.util.Optional;
-
 import com.ctre.phoenix.led.CANdle;
 import com.ctre.phoenix.led.CANdle.LEDStripType;
 import com.ctre.phoenix.led.CANdleConfiguration;
+import com.ctre.phoenix.led.FireAnimation;
 import com.ctre.phoenix.led.RainbowAnimation;
 import com.ctre.phoenix.led.StrobeAnimation;
 
+import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj.Notifier;
+import edu.wpi.first.wpilibj.util.Color;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.RobotConstants;
+import frc.robot.subsystems.leds.commands.AutoLEDs;
+import frc.robot.subsystems.leds.commands.Blinking;
+import frc.robot.subsystems.leds.commands.EndgameLEDs;
+import frc.robot.subsystems.leds.commands.EveryOther;
+import frc.robot.subsystems.leds.commands.NoAllianceLEDs;
+import frc.robot.subsystems.leds.commands.PiecePresent;
+import frc.robot.subsystems.leds.commands.Runway;
 
+@Logged
 public class LEDS extends SubsystemBase
 {
-    private final Notifier periodicNotifier;
     private CANdle candle;
     private CANdleConfiguration config;
     private int ledCount;
-    private Optional<Alliance> alliance;
-    private boolean isAnimating;
-
-    private class RGB
-    {
-        int r;
-        int b;
-        int g;
-
-        RGB(int r, int g, int b)
-        {
-            this.r = r;
-            this.g = g;
-            this.b = b;
-        }
-    }
 
     public static enum GameState
     {
-        NONE, AUTO, TELEOP, ENDGAME, HASPIECE, WANTSPIECE, READYPLACE
+        NONE, NO_ALLIANCE, BLUE_ALLIANCE, RED_ALLIANCE, AUTO, TELEOP, ENDGAME, HASPIECE, WANTSPIECE, READYPLACE
     };
 
-    private RGB teamColour = new RGB(238, 10, 154);
-
     private int currentAnimationTick = 0;
-
-    private GameState currenState = GameState.ENDGAME;
-    private GameState prevState;
 
     public void resetLEDS()
     {
         candle.setLEDs(0, 0, 0, 0, 0, ledCount);
-    }
-
-    public void setLEDState(GameState state)
-    {
-        prevState = currenState;
-        currenState = state;
     }
 
     public LEDS(int CANid, int ledCount)
@@ -68,8 +48,6 @@ public class LEDS extends SubsystemBase
         config.stripType = LEDStripType.RGB;
         config.brightnessScalar = 0.75;
         candle.configAllSettings(config);
-        alliance = DriverStation.getAlliance();
-        periodicNotifier = new Notifier(this::periodic);
     }
 
     public void rainbowAnimation(double brightness, double animationSpeed)
@@ -78,9 +56,14 @@ public class LEDS extends SubsystemBase
         candle.animate(rainbowAnim);
     }
 
-    public void setColour(RGB colour)
+    public void setColour(Color color, int start, int length)
     {
-        candle.setLEDs(colour.r, colour.g, colour.b, 0, 0, ledCount);
+        candle.setLEDs((int) (255 * color.red), (int) (255 * color.green), (int) (255 * color.blue), 0, start, length);
+    }
+
+    public void setColour(Color colour)
+    {
+        setColour(colour, 0, ledCount);
     }
 
     public int[] particalTranslation(int tick)
@@ -106,28 +89,28 @@ public class LEDS extends SubsystemBase
         return new int[0];
     }
 
-    public void feedParticalEffect(double brightness)
+    public void feedParticalEffect(double brightness, int tick)
     {
         candle.setLEDs(0, 0, 0, 0, 0, ledCount);
-        int[] particalReturn = particalTranslation(currentAnimationTick);
+        int[] particalReturn = particalTranslation(tick);
         for (int i = 0; i < particalReturn.length; i++)
         {
-            candle.setLEDs(teamColour.r, teamColour.g, teamColour.b, 0, particalReturn[i] + 8, 1);
+            setColour(RobotConstants.LEDConstants.kTeamColor, particalReturn[i] + 8, 1);
         }
         int[] nextParticle0 = particalTranslation((int) MathUtil.inputModulus(currentAnimationTick + 4, 0, 32));
         for (int i = 0; i < nextParticle0.length; i++)
         {
-            candle.setLEDs(teamColour.r, teamColour.g, teamColour.b, 0, nextParticle0[i] + 8, 1);
+            setColour(RobotConstants.LEDConstants.kTeamColor, particalReturn[i] + 8, 1);
         }
         int[] nextParticle1 = particalTranslation((int) MathUtil.inputModulus(currentAnimationTick + 8, 0, 32));
         for (int i = 0; i < nextParticle1.length; i++)
         {
-            candle.setLEDs(teamColour.r, teamColour.g, teamColour.b, 0, nextParticle1[i] + 8, 1);
+            setColour(RobotConstants.LEDConstants.kTeamColor, particalReturn[i] + 8, 1);
         }
         int[] nextParticle2 = particalTranslation((int) MathUtil.inputModulus(currentAnimationTick + 12, 0, 32));
         for (int i = 0; i < nextParticle2.length; i++)
         {
-            candle.setLEDs(teamColour.r, teamColour.g, teamColour.b, 0, nextParticle2[i] + 8, 1);
+            setColour(RobotConstants.LEDConstants.kTeamColor, particalReturn[i] + 8, 1);
         }
     }
 
@@ -136,34 +119,23 @@ public class LEDS extends SubsystemBase
         candle.setLEDs(255, 0, 255, 0, 0, ledCount);
     }
 
-    public void setEveryOtherColour(RGB inputColour1, RGB inputColour2)
+    public void setEveryOtherColour(Color inputColour1, Color inputColour2)
     {
         for (int i = 0; i < ledCount; i++)
         {
             if (i % 2 == 0)
             {
-                candle.setLEDs(inputColour1.r, inputColour1.g, inputColour1.b, 0, i, 1);
+                setColour(inputColour1, i, 1);
             } else
             {
-                candle.setLEDs(inputColour2.r, inputColour2.g, inputColour2.b, 0, i, 1);
+                setColour(inputColour2, i, 1);
             }
         }
     }
 
-    public void everyOther(RGB allianceColour)
+    public void everyOther(Color allianceColour)
     {
-        setEveryOtherColour(allianceColour, teamColour);
-    }
-
-    public void readyPlace()
-    {
-        if (currentAnimationTick % 2 == 0)
-        {
-            candle.setLEDs(teamColour.r, teamColour.g, teamColour.b, 0, 0, ledCount);
-        } else
-        {
-            candle.setLEDs(0, 0, 0, 0, 0, ledCount);
-        }
+        setEveryOtherColour(allianceColour, RobotConstants.LEDConstants.kTeamColor);
     }
 
     public void clearAnimationBuffer()
@@ -172,97 +144,58 @@ public class LEDS extends SubsystemBase
         {
             candle.clearAnimation(i);
         }
-        isAnimating = false;
-        resetLEDS();
     }
 
-    public void strobe(RGB inputColour)
+    public void strobe(Color inputColour)
     {
-        StrobeAnimation strobeAnimation = new StrobeAnimation(inputColour.r, inputColour.g, inputColour.b, 0, 0.5,
-                ledCount);
+        StrobeAnimation strobeAnimation = new StrobeAnimation((int) (255 * inputColour.red),
+                (int) (255 * inputColour.green), (int) (255 * inputColour.blue), 0, 0.5, ledCount);
         candle.animate(strobeAnimation);
     }
 
-    public RGB determineRGBAlliance(Optional<Alliance> allianceTemp)
+    public void fire()
     {
-        if (allianceTemp.isPresent())
-        {
-            if (allianceTemp.get() == Alliance.Blue)
-            {
-                return new RGB(0, 0, 255);
-            } else if (allianceTemp.get() == Alliance.Red)
-            {
-                return new RGB(255, 0, 0);
-            } else
-            {
-                setColour(new RGB(238, 10, 154));
-            }
-        } else
-        {
-            setColour(new RGB(238, 10, 154));
-        }
-        return new RGB(238, 10, 154);
+        FireAnimation fireAnimation = new FireAnimation(0.5, 0.5, ledCount, 0.5, 0.5);
+        candle.animate(fireAnimation);
     }
 
-    public void startPeriodic()
+    public Command readyToPlace()
     {
-        periodicNotifier.startPeriodic(0.02);
+        return new Blinking(this);
     }
 
-    public void stopPeriodic()
+    public Command hungry()
     {
-        periodicNotifier.stop();
+        return new Runway(this);
     }
 
-    public void periodic()
+    public Command happy()
     {
-        alliance = DriverStation.getAlliance();
-        // clearAnimationBuffer();
-        currentAnimationTick = (int) MathUtil.inputModulus((double) (currentAnimationTick + 1), 0, 32);
-        if (prevState != currenState)
-        {
-            switch (currenState)
-            {
-            case NONE:
-                if (!isAnimating)
-                {
-                    rainbowAnimation(0.5, 0.5);
-                    isAnimating = true;
-                }
-                break;
-            case HASPIECE:
-                clearAnimationBuffer();
-                hasPiece();
-                break;
-            case WANTSPIECE:
-                clearAnimationBuffer();
-                feedParticalEffect(0.5);
-                break;
-            case READYPLACE:
-                clearAnimationBuffer();
-                readyPlace();
-                break;
-            case AUTO:
-                clearAnimationBuffer();
-                everyOther(determineRGBAlliance(alliance));
-                break;
-            case ENDGAME:
-                if (!isAnimating)
-                {
-                    resetLEDS();
-                    strobe(determineRGBAlliance(alliance));
-                    isAnimating = true;
-                }
-                break;
-            default:
-                break;
-            }
-        } else if (currenState == GameState.WANTSPIECE)
-        {
-            feedParticalEffect(0.5);
-        }
+        return new PiecePresent(this);
+    }
 
-        prevState = currenState;
+    public Command noAlliance()
+    {
+        return new NoAllianceLEDs(this);
+    }
 
+    public Command redAlliance()
+    {
+        return new EveryOther(this, Color.kRed);
+    }
+
+    public Command blueAlliance()
+    {
+        return new EveryOther(this, Color.kBlue);
+    }
+
+    public Command auto()
+    {
+        return new AutoLEDs(this);
+    }
+
+    public Command endgame()
+    {
+        return new EndgameLEDs(this);
     }
 }

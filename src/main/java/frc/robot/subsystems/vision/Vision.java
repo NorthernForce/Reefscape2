@@ -8,6 +8,7 @@ import edu.wpi.first.networktables.DoubleSubscriber;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
+@Logged
 public class Vision extends SubsystemBase
 {
     DoubleSubscriber xOffsetSubscriber;
@@ -47,22 +48,24 @@ public class Vision extends SubsystemBase
         return Double.isNaN(xOffset) ? Optional.empty() : Optional.of(xOffset);
     }
 
-    @Logged(name = "XOffset")
     public double getRawXOffset()
     {
         return xOffset;
     }
 
-    @Logged(name = "RawPosts")
     public double[] getRawPosts()
     {
         return posts;
     }
 
-    @Logged(name = "Connected")
     public boolean connected()
     {
         return connected;
+    }
+
+    public boolean isAligned()
+    {
+        return Math.abs(xOffset) < 0.05;
     }
 
 }
