@@ -2,6 +2,7 @@ package frc.robot.subsystems.algae_extractor;
 
 import com.ctre.phoenix6.configs.TalonFXSConfiguration;
 import com.ctre.phoenix6.hardware.TalonFXS;
+import com.ctre.phoenix6.signals.AdvancedHallSupportValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorArrangementValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -33,6 +34,7 @@ public class AlgaeExtractor extends SubsystemBase
                 : InvertedValue.CounterClockwise_Positive;
         config.ExternalFeedback.SensorToMechanismRatio = gearRatio;
         config.Commutation.MotorArrangement = MotorArrangementValue.Minion_JST;
+        config.Commutation.AdvancedHallSupport = AdvancedHallSupportValue.Enabled;
         config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
         m_motor.getConfigurator().apply(config);
     }
