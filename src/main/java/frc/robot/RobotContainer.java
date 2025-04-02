@@ -23,6 +23,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.net.PortForwarder;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -79,6 +80,21 @@ public class RobotContainer
         SmartDashboard.putData("AutonomousChooser", autonomousChooser);
         SmartDashboard.putData("Test Left Reef", driveToReefLeft());
         SmartDashboard.putData("Reset Encoders", drive.resetEncoders());
+        PortForwarder.add(1181, "10.1.72.11", 5800);
+        PortForwarder.add(1182, "10.1.72.11", 1181);
+        PortForwarder.add(1183, "10.1.72.13", 5800);
+        PortForwarder.add(1184, "10.1.72.13", 1181);
+        for (int i = 0; i <= 5; i++)
+        {
+            PortForwarder.add(5800 + i, "10.1.72.12", 5800 + i);
+        }
+        for (int i = 5; i <= 4; i++)
+        {
+            PortForwarder.add(5805 + i, "10.1.72.15", 5800 + i);
+        }
+        PortForwarder.add(1185, "10.1.72.15", 5805);
+        PortForwarder.add(1186, "10.1.72.36", 1181);
+        PortForwarder.add(1187, "10.1.72.36", 1182);
     }
 
     private static DoubleSupplier processJoystick(DoubleSupplier joystick)
