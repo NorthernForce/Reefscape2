@@ -23,7 +23,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -60,7 +59,7 @@ public class RobotContainer
     private final Vision vision;
 
     private final LEDS leds;
-    
+
     private boolean isRightSideAuto;
 
     public RobotContainer()
@@ -144,8 +143,10 @@ public class RobotContainer
         driverController.a().whileTrue(climber.getExtendCommand());
         driverController.b().whileTrue(climber.getRetractCommand());
 
-        NamedCommands.registerCommand("DriveToCloseLeft", Commands.either(driveToReefRight(), driveToReefLeft(), () -> isRightSideAuto));
-        NamedCommands.registerCommand("DriveToCloseRight", Commands.either(driveToReefLeft(), driveToReefRight(), () -> isRightSideAuto));
+        NamedCommands.registerCommand("DriveToCloseLeft",
+                Commands.either(driveToReefRight(), driveToReefLeft(), () -> isRightSideAuto));
+        NamedCommands.registerCommand("DriveToCloseRight",
+                Commands.either(driveToReefLeft(), driveToReefRight(), () -> isRightSideAuto));
 
         superstructure.setDefaultCommand(superstructure.moveByJoystick(processJoystick(manipulatorController::getLeftY),
                 processJoystick(manipulatorController::getRightY)));
@@ -170,8 +171,10 @@ public class RobotContainer
         NamedCommands.registerCommand("Intake", manipulator.intake());
         NamedCommands.registerCommand("Outtake",
                 Commands.deadline(manipulator.outtake().andThen(Commands.waitSeconds(0.1)), superstructure.holdAtL4()));
-        NamedCommands.registerCommand("RemoveAlgae", algaeExtractor.getExtractCommand()
-                .alongWith(drive.driveAtRobotRelativeSpeeds(new ChassisSpeeds(-0.2, 0, 0)).withTimeout(2)));
+        NamedCommands.registerCommand("RemoveAlgae",
+                drive.strafeLeft(0.1).withTimeout(0.1)
+                        .andThen(algaeExtractor.getExtractCommand().alongWith(drive.goBackward(0.2).withTimeout(2)))
+                        .andThen(drive.stop()));
 
         leds.setDefaultCommand(leds.noAlliance());
 
@@ -204,8 +207,7 @@ public class RobotContainer
         if (autonomousChooser.getSelected().getFirst() == "RIGHT.E.D.C")
         {
             isRightSideAuto = true;
-        }
-        else
+        } else
         {
             isRightSideAuto = false;
         }

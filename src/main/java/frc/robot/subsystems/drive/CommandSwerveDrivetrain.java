@@ -448,4 +448,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     {
         return Commands.runOnce(this::resetDriveEncoders);
     }
+
+    public Command stop()
+    {
+        SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
+        return applyRequest(() -> brake);
+    }
 }
