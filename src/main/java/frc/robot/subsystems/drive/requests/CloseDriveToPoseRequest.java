@@ -20,20 +20,18 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 
 public class CloseDriveToPoseRequest implements SwerveRequest
 {
-    private final Pose2d targetPose;
-    private final Supplier<Pose2d> poseGetter;
     private final FieldCentricFacingAngle facingAngle;
     private final PIDController xPID;
     private final PIDController yPID;
     private final PIDController viewerPID;
     private final LinearVelocity maxVelocity;
+    @SuppressWarnings("unused")
     private final Supplier<Optional<Double>> offsetSupplier;
 
     public CloseDriveToPoseRequest(Pose2d pose, double tP, double tI, double tD, double rP, double rI, double rD,
             double vP, double vI, double vD, LinearVelocity maxVelocity, Supplier<Pose2d> poseGetter,
             Supplier<Optional<Double>> offsetSupplier)
     {
-        this.targetPose = pose;
         this.xPID = new PIDController(tP, tI, tD);
         this.yPID = new PIDController(tP, tI, tD);
         this.viewerPID = new PIDController(vP, vI, vD);
@@ -49,7 +47,6 @@ public class CloseDriveToPoseRequest implements SwerveRequest
         facingAngle.withTargetDirection(pose.getRotation());
         facingAngle.withDriveRequestType(DriveRequestType.Velocity);
         this.maxVelocity = maxVelocity;
-        this.poseGetter = poseGetter;
         this.offsetSupplier = offsetSupplier;
     }
 
@@ -59,7 +56,7 @@ public class CloseDriveToPoseRequest implements SwerveRequest
         double vx = xPID.calculate(parameters.currentPose.getX());
         double vy = yPID.calculate(parameters.currentPose.getY());
         ChassisSpeeds targetSpeeds = new ChassisSpeeds(vx, vy, 0);
-        var target = offsetSupplier.get();
+        // var target = offsetSupplier.get();
         // if (target.isPresent() &&
         // poseGetter.get().getTranslation().getDistance(targetPose.getTranslation()) <
         // 0.18)

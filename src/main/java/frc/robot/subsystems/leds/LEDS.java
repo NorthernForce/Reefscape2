@@ -2,8 +2,6 @@ package frc.robot.subsystems.leds;
 
 import java.util.Optional;
 
-import org.w3c.dom.css.RGBColor;
-
 import com.ctre.phoenix.led.CANdle;
 import com.ctre.phoenix.led.CANdle.LEDStripType;
 import com.ctre.phoenix.led.CANdleConfiguration;
@@ -14,7 +12,6 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Notifier;
-import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class LEDS extends SubsystemBase
@@ -103,6 +100,7 @@ public class LEDS extends SubsystemBase
         {
             int[] returnArray =
             { 31 + 6 };
+            return returnArray;
         }
 
         return new int[0];
