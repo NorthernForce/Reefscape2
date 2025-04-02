@@ -6,6 +6,8 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
+
+import java.util.ArrayList;
 import java.util.Set;
 import java.util.function.DoubleSupplier;
 
@@ -20,6 +22,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -161,13 +164,21 @@ public class RobotContainer
         NamedCommands.registerCommand("GoToIntake", superstructure.moveToIntake());
         NamedCommands.registerCommand("Intake", manipulator.intake());
         NamedCommands.registerCommand("Outtake",
-                Commands.deadline(manipulator.outtake(), superstructure.holdAtGoal(SuperstructureGoal.L4)));
+                Commands.deadline(manipulator.outtake().andThen(Commands.waitSeconds(0.1)), superstructure.holdAtL4()));
+        NamedCommands.registerCommand("RemoveAlgae", algaeExtractor.getExtractCommand()
+                .alongWith(drive.driveAtRobotRelativeSpeeds(new ChassisSpeeds(-0.2, 0, 0)).withTimeout(2)));
     }
 
     @NotLogged
     public Command getAutonomousCommand()
     {
         return autonomousChooser.getSelected();
+    }
+
+    public Command bruteOuttake()
+    {
+        return Commands.runOnce(() -> manipulator.setState(ManipulatorState.BRUTE_OUTTAKING))
+                .until(() -> !manipulator.hasCoralInSensor());
     }
 
     public Distance getDistanceToPose(Pose2d pose)
@@ -249,7 +260,8 @@ public class RobotContainer
         SendableChooser<Command> chooser = new SendableChooser<>();
         chooser.setDefaultOption("Leave", simpleLeave());
         chooser.addOption("Do nothing", Commands.print("Do nothing"));
-        chooser.addOption("LEFT.J.K.L", new PathPlannerAuto("LEFT.J.K.L"));
+        chooser.addOption("PLS WORK!!!", new PathPlannerAuto("LEFT.J.K.L"));
+        chooser.addOption("PLS WORK2!!!", new PathPlannerAuto("Attempt #"));
         chooser.addOption("RIGHT.E.D.C", new PathPlannerAuto("RIGHT.E.D.C"));
         chooser.addOption("CENTER.PLACE.G", new PathPlannerAuto("CENTER.PLACE.G"));
         return chooser;
@@ -312,5 +324,23 @@ public class RobotContainer
     public void resetPose()
     {
         drive.resetPose(new Pose2d());
+    }
+
+    public String[] getCommandsRunning()
+    {
+        ArrayList<String> commandsRunning = new ArrayList<>();
+        if (drive.getCurrentCommand() != null)
+        {
+            commandsRunning.add(drive.getCurrentCommand().getName());
+        }
+        if (manipulator.getCurrentCommand() != null)
+        {
+            commandsRunning.add(manipulator.getCurrentCommand().getName());
+        }
+        if (superstructure.getCurrentCommand() != null)
+        {
+            commandsRunning.add(superstructure.getCurrentCommand().getName());
+        }
+        return commandsRunning.toArray(new String[0]);
     }
 }

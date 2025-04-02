@@ -50,7 +50,7 @@ public class RobotConstants
         public static final PathConstraints kPPConstraints = new PathConstraints(kPPMaxVelocity, kPPMaxAcceleration,
                 kPPMaxAngularVelocity, kPPMaxAngularAcceleration);
 
-        public static final double kCloseDriveTP = 2.9;
+        public static final double kCloseDriveTP = 2.65;
         public static final double kCloseDriveTI = 0.0;
         public static final double kCloseDriveTD = 0.0;
 

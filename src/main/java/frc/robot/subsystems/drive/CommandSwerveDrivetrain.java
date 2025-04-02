@@ -42,6 +42,7 @@ import frc.robot.RobotConstants;
 import frc.robot.RobotConstants.DriveConstants;
 import frc.robot.generated.TunerConstants;
 import frc.robot.generated.TunerConstants.TunerSwerveDrivetrain;
+import frc.robot.subsystems.drive.commands.DriveAtRobotRelativeSpeeds;
 import frc.robot.subsystems.drive.requests.CloseDriveToPoseRequest;
 
 /**
@@ -385,13 +386,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     public Command driveAtRobotRelativeSpeeds(ChassisSpeeds speeds)
     {
-        SwerveRequest.RobotCentric robotCentric = new SwerveRequest.RobotCentric()
-                .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
-        return applyRequest(() ->
-        {
-            return robotCentric.withVelocityX(speeds.vxMetersPerSecond).withVelocityY(speeds.vyMetersPerSecond)
-                    .withRotationalRate(speeds.omegaRadiansPerSecond);
-        });
+        return new DriveAtRobotRelativeSpeeds(this, speeds);
     }
 
     public Command goForward(double speed)
