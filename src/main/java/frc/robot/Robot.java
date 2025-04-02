@@ -4,8 +4,12 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Seconds;
+
 import edu.wpi.first.epilogue.Epilogue;
+import edu.wpi.first.epilogue.EpilogueConfiguration;
 import edu.wpi.first.epilogue.Logged;
+import edu.wpi.first.epilogue.logging.errors.ErrorHandler;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -22,6 +26,12 @@ public class Robot extends TimedRobot
     {
         m_robotContainer = new RobotContainer();
         DataLogManager.start();
+        Epilogue.configure(config ->
+        {
+            config.root = "Robot";
+            config.errorHandler = ErrorHandler.printErrorMessages();
+            config.loggingPeriod = Seconds.of(0.1);
+        });
         Epilogue.bind(this);
     }
 
@@ -50,8 +60,9 @@ public class Robot extends TimedRobot
     @Override
     public void autonomousInit()
     {
+        m_robotContainer.autonomousInit();
         m_autonomousCommand = m_robotContainer.getAutonomousCommand();
-
+        m_robotContainer.resetPose();
         if (m_autonomousCommand != null)
         {
             m_autonomousCommand.schedule();

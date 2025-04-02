@@ -2,13 +2,17 @@ package frc.robot.subsystems.manipulator;
 
 import com.ctre.phoenix6.hardware.TalonFXS;
 
+import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotConstants;
+import frc.robot.subsystems.manipulator.command.Intake;
+import frc.robot.subsystems.manipulator.command.Outtake;
 
+@Logged
 public class Manipulator extends SubsystemBase
 {
     private TalonFXS m_motor;
@@ -50,17 +54,12 @@ public class Manipulator extends SubsystemBase
 
     public Command intake()
     {
-        return run(() ->
-        {
-        }).until(this::hasCoral);
+        return new Intake(this);
     }
 
     public Command outtake()
     {
-        return runOnce(() ->
-        {
-            m_state = ManipulatorState.OUTTAKING;
-        }).alongWith(Commands.waitUntil(() -> !hasCoralInSensor()));
+        return new Outtake(this);
     }
 
     public Command slowOuttake()
@@ -74,6 +73,15 @@ public class Manipulator extends SubsystemBase
     public ManipulatorState getState()
     {
         return m_state;
+    }
+
+    public void setState(ManipulatorState state)
+    {
+        m_state = state;
+        if (state == ManipulatorState.BRUTE_OUTTAKING)
+        {
+            m_timer.restart();
+        }
     }
 
     @Override
@@ -123,11 +131,18 @@ public class Manipulator extends SubsystemBase
             {
                 m_state = ManipulatorState.HUNGRY;
             }
+            break;
+        case BRUTE_OUTTAKING:
+            set(RobotConstants.ManipulatorConstants.kOuttakeSpeed);
+            if (m_timer.hasElapsed(1.0))
+            {
+                m_state = ManipulatorState.HUNGRY;
+            }
         }
     }
 
     public enum ManipulatorState
     {
-        HUNGRY, PURGING, REINTAKING, OUTTAKING, HAPPY, SLOW_OUTTAKING
+        HUNGRY, PURGING, REINTAKING, OUTTAKING, HAPPY, SLOW_OUTTAKING, BRUTE_OUTTAKING
     }
 }

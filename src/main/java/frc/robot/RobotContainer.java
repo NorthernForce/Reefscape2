@@ -6,11 +6,11 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
+
+import java.util.ArrayList;
 import java.util.Set;
 import java.util.function.DoubleSupplier;
 
-import com.ctre.phoenix.led.CANdle;
-import com.ctre.phoenix.led.RainbowAnimation;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 
@@ -22,7 +22,9 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -36,8 +38,11 @@ import frc.robot.subsystems.algae_extractor.AlgaeExtractor;
 import frc.robot.subsystems.apriltags.Localizer;
 import frc.robot.subsystems.climber.Climber;
 import frc.robot.subsystems.drive.CommandSwerveDrivetrain;
+import frc.robot.subsystems.leds.LEDS;
 import frc.robot.subsystems.manipulator.Manipulator;
+import frc.robot.subsystems.manipulator.Manipulator.ManipulatorState;
 import frc.robot.subsystems.superstructure.Superstructure;
+import frc.robot.subsystems.vision.Vision;
 
 @Logged
 public class RobotContainer
@@ -49,8 +54,9 @@ public class RobotContainer
     private final Climber climber;
     private final Superstructure superstructure;
     private final AlgaeExtractor algaeExtractor;
+    private final Vision vision;
 
-    private final CANdle candle;
+    private final LEDS leds;
 
     public RobotContainer()
     {
@@ -62,12 +68,13 @@ public class RobotContainer
                 RobotConstants.AlgaeRemoverConstants.kSensorId, RobotConstants.AlgaeRemoverConstants.kInverted,
                 RobotConstants.AlgaeRemoverConstants.kGearRatio, RobotConstants.AlgaeRemoverConstants.kRemovingSpeed,
                 RobotConstants.AlgaeRemoverConstants.kReturningSpeed);
+        vision = new Vision("skynet", "Viewer");
         configureBindings();
         autonomousChooser = getAutonomousChooser();
         SmartDashboard.putData("AutonomousChooser", autonomousChooser);
         SmartDashboard.putData("Test Left Reef", driveToReefLeft());
         SmartDashboard.putData("Reset Encoders", drive.resetEncoders());
-        candle = new CANdle(30);
+        leds = new LEDS(RobotConstants.LEDConstants.kCANId, RobotConstants.LEDConstants.kLEDCount);
     }
 
     private static DoubleSupplier processJoystick(DoubleSupplier joystick)
@@ -150,19 +157,28 @@ public class RobotContainer
 
         manipulatorController.start().whileTrue(superstructure.getHomingCommand());
 
-        NamedCommands.registerCommand("GoToL4Goal", superstructure.moveToL4());
-        NamedCommands.registerCommand("GoToL3Goal", superstructure.moveToL3());
-        NamedCommands.registerCommand("GoToL2Goal", superstructure.moveToL2());
-        NamedCommands.registerCommand("GoToL1Goal", superstructure.moveToL1());
+        NamedCommands.registerCommand("GoToL4Goal", superstructure.holdAtL4());
+        NamedCommands.registerCommand("GoToL3Goal", superstructure.holdAtL3());
+        NamedCommands.registerCommand("GoToL2Goal", superstructure.holdAtL2());
+        NamedCommands.registerCommand("GoToL1Goal", superstructure.holdAtL1());
         NamedCommands.registerCommand("GoToIntake", superstructure.moveToIntake());
         NamedCommands.registerCommand("Intake", manipulator.intake());
-        NamedCommands.registerCommand("Outtake", manipulator.outtake());
+        NamedCommands.registerCommand("Outtake",
+                Commands.deadline(manipulator.outtake().andThen(Commands.waitSeconds(0.1)), superstructure.holdAtL4()));
+        NamedCommands.registerCommand("RemoveAlgae", algaeExtractor.getExtractCommand()
+                .alongWith(drive.driveAtRobotRelativeSpeeds(new ChassisSpeeds(-0.2, 0, 0)).withTimeout(2)));
     }
 
     @NotLogged
     public Command getAutonomousCommand()
     {
         return autonomousChooser.getSelected();
+    }
+
+    public Command bruteOuttake()
+    {
+        return Commands.runOnce(() -> manipulator.setState(ManipulatorState.BRUTE_OUTTAKING))
+                .until(() -> !manipulator.hasCoralInSensor());
     }
 
     public Distance getDistanceToPose(Pose2d pose)
@@ -185,6 +201,16 @@ public class RobotContainer
         return closest;
     }
 
+    public Pose2d getLeftPose()
+    {
+        return applyPlacingOffset(getNearestReefSide().left());
+    }
+
+    public Pose2d getRightPose()
+    {
+        return applyPlacingOffset(getNearestReefSide().right());
+    }
+
     public Pose2d applyPlacingOffset(Pose2d pose)
     {
         return FieldConstants.applyOffset(pose, DriveConstants.kPlacingOffset);
@@ -193,15 +219,15 @@ public class RobotContainer
     @NotLogged
     public Command driveToReefLeft()
     {
-        return Commands.defer(() -> drive.closeDriveToPose(applyPlacingOffset(getNearestReefSide().left())),
-                Set.of(drive));
+        return Commands.defer(() -> drive.closeDriveToPose(applyPlacingOffset(getNearestReefSide().left()),
+                () -> vision.getXOffset()), Set.of(drive, vision));
     }
 
     @NotLogged
     public Command driveToReefRight()
     {
-        return Commands.defer(() -> drive.closeDriveToPose(applyPlacingOffset(getNearestReefSide().right())),
-                Set.of(drive));
+        return Commands.defer(() -> drive.closeDriveToPose(applyPlacingOffset(getNearestReefSide().right()),
+                () -> vision.getXOffset()), Set.of(drive, vision));
     }
 
     public Pose2d getNearestCoralStationPose()
@@ -213,12 +239,13 @@ public class RobotContainer
 
     public Command driveToNearestCoralStation()
     {
-        return Commands.defer(() -> drive.closeDriveToPose(getNearestCoralStationPose()), Set.of(drive));
+        return Commands.defer(() -> drive.closeDriveToPose(getNearestCoralStationPose(), () -> vision.getXOffset()),
+                Set.of(drive, vision));
     }
 
     public Command simpleLeave()
     {
-        return basicAutoResetForStart().andThen(drive.goForward(0.5).withTimeout(2));
+        return basicAutoResetForStart().andThen(drive.goForward(1.0).withTimeout(2));
     }
 
     public Command basicAutoResetForStart()
@@ -233,10 +260,22 @@ public class RobotContainer
         SendableChooser<Command> chooser = new SendableChooser<>();
         chooser.setDefaultOption("Leave", simpleLeave());
         chooser.addOption("Do nothing", Commands.print("Do nothing"));
-        chooser.addOption("LEFT.J.K.L", new PathPlannerAuto("LEFT.J.K.L"));
+        chooser.addOption("PLS WORK!!!", new PathPlannerAuto("LEFT.J.K.L"));
+        chooser.addOption("PLS WORK2!!!", new PathPlannerAuto("Attempt #"));
         chooser.addOption("RIGHT.E.D.C", new PathPlannerAuto("RIGHT.E.D.C"));
         chooser.addOption("CENTER.PLACE.G", new PathPlannerAuto("CENTER.PLACE.G"));
         return chooser;
+    }
+
+    public void autonomousInit()
+    {
+        if (manipulator.hasCoralInSensor())
+        {
+            manipulator.setState(ManipulatorState.HAPPY);
+        } else
+        {
+            manipulator.setState(ManipulatorState.HUNGRY);
+        }
     }
 
     public void periodic()
@@ -244,11 +283,26 @@ public class RobotContainer
         localizer.updateWithReferencePose(drive.getPose());
         for (var pose : localizer.getEstimatedPoses())
         {
-            drive.addVisionMeasurement(pose.estimatedPose.toPose2d(), pose.timestampSeconds,
-                    VecBuilder.fill(0.9, 0.9, 999999));
+            drive.addVisionMeasurement(pose.pose(), pose.timestamp(), VecBuilder.fill(0.9, 0.9, 999999));
         }
         manipulator.setCanIntake(superstructure.isAtHeight(SuperstructureGoal.CORAL_STATION.getState()));
-        candle.animate(new RainbowAnimation());
+
+        if (manipulator.hasCoral() && !DriverStation.isDisabled())
+        {
+            leds.setLEDState(LEDS.GameState.HASPIECE);
+        } else if (!manipulator.hasCoral() && !DriverStation.isDisabled())
+        {
+            leds.setLEDState(LEDS.GameState.WANTSPIECE);
+        } else if (DriverStation.isDisabled())
+        {
+            leds.setLEDState(LEDS.GameState.AUTO);
+        } else if (DriverStation.isAutonomous())
+        {
+            leds.setLEDState(LEDS.GameState.AUTO);
+        } else if (DriverStation.getMatchTime() <= 20)
+        {
+            leds.setLEDState(LEDS.GameState.ENDGAME);
+        }
     }
 
     public Pose3d[] getComponentPoses()
@@ -265,5 +319,28 @@ public class RobotContainer
     public Pose3d getRobotPose3d()
     {
         return new Pose3d(drive.getPose());
+    }
+
+    public void resetPose()
+    {
+        drive.resetPose(new Pose2d());
+    }
+
+    public String[] getCommandsRunning()
+    {
+        ArrayList<String> commandsRunning = new ArrayList<>();
+        if (drive.getCurrentCommand() != null)
+        {
+            commandsRunning.add(drive.getCurrentCommand().getName());
+        }
+        if (manipulator.getCurrentCommand() != null)
+        {
+            commandsRunning.add(manipulator.getCurrentCommand().getName());
+        }
+        if (superstructure.getCurrentCommand() != null)
+        {
+            commandsRunning.add(superstructure.getCurrentCommand().getName());
+        }
+        return commandsRunning.toArray(new String[0]);
     }
 }

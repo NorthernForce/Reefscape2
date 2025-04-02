@@ -11,6 +11,7 @@ import frc.robot.RobotConstants.ElevatorConstants;
 import frc.robot.RobotConstants.InnerElevatorConstants;
 import frc.robot.RobotConstants.OuterElevatorConstants;
 import frc.robot.RobotConstants.SuperstructureGoal;
+import frc.robot.subsystems.superstructure.commands.HoldAtState;
 import frc.robot.subsystems.superstructure.commands.HomeSuperstructure;
 import frc.robot.subsystems.superstructure.commands.MoveByJoystick;
 import frc.robot.subsystems.superstructure.commands.MoveToState;
@@ -64,6 +65,11 @@ public class Superstructure extends SubsystemBase
         return runOnce(() -> setTargetState(goal)).andThen(new MoveToState(this, goal));
     }
 
+    public Command holdAtGoal(SuperstructureGoal goal)
+    {
+        return runOnce(() -> setTargetState(goal)).andThen(new HoldAtState(this, goal));
+    }
+
     @NotLogged
     public Elevator getInnerElevator()
     {
@@ -94,6 +100,26 @@ public class Superstructure extends SubsystemBase
     public Command moveToL4()
     {
         return moveToGoal(SuperstructureGoal.L4);
+    }
+
+    public Command holdAtL1()
+    {
+        return holdAtGoal(SuperstructureGoal.L1);
+    }
+
+    public Command holdAtL2()
+    {
+        return holdAtGoal(SuperstructureGoal.L2);
+    }
+
+    public Command holdAtL3()
+    {
+        return holdAtGoal(SuperstructureGoal.L3);
+    }
+
+    public Command holdAtL4()
+    {
+        return holdAtGoal(SuperstructureGoal.L4);
     }
 
     public Command moveToIntake()

@@ -50,7 +50,7 @@ public class RobotConstants
         public static final PathConstraints kPPConstraints = new PathConstraints(kPPMaxVelocity, kPPMaxAcceleration,
                 kPPMaxAngularVelocity, kPPMaxAngularAcceleration);
 
-        public static final double kCloseDriveTP = 2.9;
+        public static final double kCloseDriveTP = 2.65;
         public static final double kCloseDriveTI = 0.0;
         public static final double kCloseDriveTD = 0.0;
 
@@ -58,7 +58,12 @@ public class RobotConstants
         public static final double kCloseDriveRI = 0.0;
         public static final double kCloseDriveRD = 0.0;
 
-        public static final Translation2d kPlacingOffset = new Translation2d(Inches.of(2.5), Inches.of(-12.25));
+        // TODO: maybe tune a bit
+        public static final double kCloseDriveVP = 2.5;
+        public static final double kCloseDriveVI = 0.0;
+        public static final double kCloseDriveVD = 0.1;
+
+        public static final Translation2d kPlacingOffset = new Translation2d(Inches.of(3.5), Inches.of(-11.75));
         public static final Angle[] SWERVE_MODULE_OFFSETS =
         { Rotations.of(Preferences.getDouble("kSwerveOffsetFrontLeft", TunerConstants.FrontLeft.EncoderOffset)),
                 Rotations.of(Preferences.getDouble("kSwerveOffsetFrontRight", TunerConstants.FrontRight.EncoderOffset)),
@@ -75,11 +80,11 @@ public class RobotConstants
 
         public static final Transform3d kFrontLeftCameraTransform = new Transform3d(
                 new Translation3d(Inches.of(15.0 - 3.0), Inches.of(15.0 - 7.75), Inches.of(8.5)),
-                new Rotation3d(Degrees.zero(), Degrees.of(-22.1), Degrees.of(53.4)));
+                new Rotation3d(Degrees.zero(), Degrees.of(-27.4), Degrees.of(53.4)));
 
         public static final Transform3d kCenterCameraTransform = new Transform3d(
                 new Translation3d(Inches.of(15.0 - 2.5), Inches.zero(), Inches.of(9.5)),
-                new Rotation3d(Degrees.zero(), Degrees.of(-22.4), Degrees.zero()));
+                new Rotation3d(Degrees.zero(), Degrees.of(-25), Degrees.zero()));
     }
 
     public static class ManipulatorConstants
@@ -97,7 +102,7 @@ public class RobotConstants
     public static class ClimberConstants
     {
         public static final int kId = 17;
-        public static final boolean kInverted = true;
+        public static final boolean kInverted = false;
         public static final int kEncoderId = 23;
         public static final Angle kLowerLimit = Rotations.of(-0.03);
         public static final Angle kUpperLimit = Rotations.of(0.22);
@@ -152,7 +157,7 @@ public class RobotConstants
         public static final double kS = 0.052289;
         public static final double kV = Units.inchesToMeters(19.868);
         public static final double kA = 0.015;
-        public static final double kP = 10;
+        public static final double kP = 18;
         public static final double kI = 0;
         public static final double kD = 0;
         public static final double kG = 0.31;
@@ -205,4 +210,9 @@ public class RobotConstants
         public static final boolean kInverted = false;
     }
 
+    public static class LEDConstants
+    {
+        public static final int kCANId = 30;
+        public static final int kLEDCount = 72;
+    }
 }

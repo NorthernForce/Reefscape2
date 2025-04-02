@@ -5,38 +5,64 @@
     "data": {
       "commands": [
         {
-          "type": "parallel",
+          "type": "deadline",
           "data": {
             "commands": [
               {
-                "type": "path",
+                "type": "deadline",
                 "data": {
-                  "pathName": "LEFT.J.K.L.1"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "GoToL4Goal"
+                  "commands": [
+                    {
+                      "type": "wait",
+                      "data": {
+                        "waitTime": 0.02
+                      }
+                    },
+                    {
+                      "type": "path",
+                      "data": {
+                        "pathName": "LEFT.J.K.L.1"
+                      }
+                    }
+                  ]
                 }
               }
             ]
           }
         },
         {
-          "type": "race",
+          "type": "deadline",
           "data": {
             "commands": [
               {
                 "type": "wait",
                 "data": {
-                  "waitTime": 1.0
+                  "waitTime": 2.05
                 }
               },
               {
                 "type": "named",
                 "data": {
                   "name": "DriveToCloseRight"
+                }
+              },
+              {
+                "type": "sequential",
+                "data": {
+                  "commands": [
+                    {
+                      "type": "wait",
+                      "data": {
+                        "waitTime": 0.5
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "GoToL4Goal"
+                      }
+                    }
+                  ]
                 }
               }
             ]
@@ -80,7 +106,7 @@
               {
                 "type": "wait",
                 "data": {
-                  "waitTime": 0.4
+                  "waitTime": 0.275
                 }
               }
             ]
@@ -91,9 +117,35 @@
           "data": {
             "commands": [
               {
-                "type": "path",
+                "type": "sequential",
                 "data": {
-                  "pathName": "LEFT.J.K.L.3"
+                  "commands": [
+                    {
+                      "type": "path",
+                      "data": {
+                        "pathName": "LEFT.J.K.L.3"
+                      }
+                    },
+                    {
+                      "type": "race",
+                      "data": {
+                        "commands": [
+                          {
+                            "type": "named",
+                            "data": {
+                              "name": "DriveToCloseLeft"
+                            }
+                          },
+                          {
+                            "type": "wait",
+                            "data": {
+                              "waitTime": 0.875
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
                 }
               },
               {
@@ -107,31 +159,25 @@
                       }
                     },
                     {
-                      "type": "named",
+                      "type": "race",
                       "data": {
-                        "name": "GoToL4Goal"
+                        "commands": [
+                          {
+                            "type": "named",
+                            "data": {
+                              "name": "GoToL4Goal"
+                            }
+                          },
+                          {
+                            "type": "wait",
+                            "data": {
+                              "waitTime": 1.5
+                            }
+                          }
+                        ]
                       }
                     }
                   ]
-                }
-              }
-            ]
-          }
-        },
-        {
-          "type": "race",
-          "data": {
-            "commands": [
-              {
-                "type": "wait",
-                "data": {
-                  "waitTime": 1.0
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "DriveToCloseLeft"
                 }
               }
             ]
@@ -175,7 +221,7 @@
               {
                 "type": "wait",
                 "data": {
-                  "waitTime": 0.4
+                  "waitTime": 0.22
                 }
               }
             ]
@@ -186,9 +232,35 @@
           "data": {
             "commands": [
               {
-                "type": "path",
+                "type": "sequential",
                 "data": {
-                  "pathName": "LEFT.J.K.L.5"
+                  "commands": [
+                    {
+                      "type": "path",
+                      "data": {
+                        "pathName": "LEFT.J.K.L.5"
+                      }
+                    },
+                    {
+                      "type": "race",
+                      "data": {
+                        "commands": [
+                          {
+                            "type": "named",
+                            "data": {
+                              "name": "DriveToCloseRight"
+                            }
+                          },
+                          {
+                            "type": "wait",
+                            "data": {
+                              "waitTime": 0.625
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
                 }
               },
               {
@@ -202,31 +274,25 @@
                       }
                     },
                     {
-                      "type": "named",
+                      "type": "race",
                       "data": {
-                        "name": "GoToL4Goal"
+                        "commands": [
+                          {
+                            "type": "named",
+                            "data": {
+                              "name": "GoToL4Goal"
+                            }
+                          },
+                          {
+                            "type": "wait",
+                            "data": {
+                              "waitTime": 1.25
+                            }
+                          }
+                        ]
                       }
                     }
                   ]
-                }
-              }
-            ]
-          }
-        },
-        {
-          "type": "race",
-          "data": {
-            "commands": [
-              {
-                "type": "wait",
-                "data": {
-                  "waitTime": 0.75
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "DriveToCloseRight"
                 }
               }
             ]

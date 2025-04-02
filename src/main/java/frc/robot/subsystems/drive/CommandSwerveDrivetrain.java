@@ -2,6 +2,7 @@ package frc.robot.subsystems.drive;
 
 import static edu.wpi.first.units.Units.*;
 
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
@@ -13,6 +14,7 @@ import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
+import com.ctre.phoenix6.swerve.SwerveRequest.ForwardPerspectiveValue;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
@@ -40,6 +42,7 @@ import frc.robot.RobotConstants;
 import frc.robot.RobotConstants.DriveConstants;
 import frc.robot.generated.TunerConstants;
 import frc.robot.generated.TunerConstants.TunerSwerveDrivetrain;
+import frc.robot.subsystems.drive.commands.DriveAtRobotRelativeSpeeds;
 import frc.robot.subsystems.drive.requests.CloseDriveToPoseRequest;
 
 /**
@@ -366,25 +369,24 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         return AutoBuilder.pathfindToPose(pose, DriveConstants.kPPConstraints);
     }
 
-    public Command closeDriveToPose(Pose2d pose)
+    public Command closeDriveToPose(Pose2d pose, Supplier<Optional<Double>> offsetSupplier)
     {
         CloseDriveToPoseRequest request = new CloseDriveToPoseRequest(pose, DriveConstants.kCloseDriveTP,
                 DriveConstants.kCloseDriveTI, DriveConstants.kCloseDriveTD, DriveConstants.kCloseDriveRP,
-                DriveConstants.kCloseDriveRI, DriveConstants.kCloseDriveRD, DriveConstants.kPPMaxVelocity);
+                DriveConstants.kCloseDriveRI, DriveConstants.kCloseDriveRD, DriveConstants.kCloseDriveVP,
+                DriveConstants.kCloseDriveVI, DriveConstants.kCloseDriveVD, DriveConstants.kPPMaxVelocity,
+                () -> this.getPose(), offsetSupplier);
         return applyRequest(() -> request).until(request::isFinished);
     }
 
-    public Command driveToPose(Pose2d pose)
+    public Command driveToPose(Pose2d pose, Supplier<Optional<Double>> offsetSupplier)
     {
-        return Commands.sequence(pathfindToPose(pose), closeDriveToPose(pose));
+        return Commands.sequence(pathfindToPose(pose), closeDriveToPose(pose, offsetSupplier));
     }
 
     public Command driveAtRobotRelativeSpeeds(ChassisSpeeds speeds)
     {
-        SwerveRequest.RobotCentric request = new SwerveRequest.RobotCentric()
-                .withDriveRequestType(DriveRequestType.OpenLoopVoltage).withVelocityX(speeds.vxMetersPerSecond)
-                .withVelocityY(speeds.vyMetersPerSecond).withRotationalRate(speeds.omegaRadiansPerSecond);
-        return applyRequest(() -> request);
+        return new DriveAtRobotRelativeSpeeds(this, speeds);
     }
 
     public Command goForward(double speed)
