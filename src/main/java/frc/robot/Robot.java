@@ -53,6 +53,7 @@ public class Robot extends TimedRobot
             m_robotContainer.periodic();
             CommandScheduler.getInstance().run();
         }
+        m_robotContainer.isFirstTime = true;
     }
 
     @Override

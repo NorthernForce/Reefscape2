@@ -97,20 +97,20 @@ public class LEDS extends SubsystemBase
         {
             setColour(RobotConstants.LEDConstants.kTeamColor, particalReturn[i] + 8, 1);
         }
-        int[] nextParticle0 = particalTranslation((int) MathUtil.inputModulus(currentAnimationTick + 4, 0, 32));
+        int[] nextParticle0 = particalTranslation((int) MathUtil.inputModulus(tick + 4, 0, 32));
         for (int i = 0; i < nextParticle0.length; i++)
         {
-            setColour(RobotConstants.LEDConstants.kTeamColor, particalReturn[i] + 8, 1);
+            setColour(RobotConstants.LEDConstants.kTeamColor, nextParticle0[i] + 8, 1);
         }
-        int[] nextParticle1 = particalTranslation((int) MathUtil.inputModulus(currentAnimationTick + 8, 0, 32));
+        int[] nextParticle1 = particalTranslation((int) MathUtil.inputModulus(tick + 8, 0, 32));
         for (int i = 0; i < nextParticle1.length; i++)
         {
-            setColour(RobotConstants.LEDConstants.kTeamColor, particalReturn[i] + 8, 1);
+            setColour(RobotConstants.LEDConstants.kTeamColor, nextParticle1[i] + 8, 1);
         }
-        int[] nextParticle2 = particalTranslation((int) MathUtil.inputModulus(currentAnimationTick + 12, 0, 32));
+        int[] nextParticle2 = particalTranslation((int) MathUtil.inputModulus(tick + 12, 0, 32));
         for (int i = 0; i < nextParticle2.length; i++)
         {
-            setColour(RobotConstants.LEDConstants.kTeamColor, particalReturn[i] + 8, 1);
+            setColour(RobotConstants.LEDConstants.kTeamColor, nextParticle2[i] + 8, 1);
         }
     }
 

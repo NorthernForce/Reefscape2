@@ -7,6 +7,7 @@ import edu.wpi.first.networktables.DoubleArraySubscriber;
 import edu.wpi.first.networktables.DoubleSubscriber;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StringArrayPublisher;
+import edu.wpi.first.networktables.StringPublisher;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 @Logged
@@ -14,7 +15,8 @@ public class Vision extends SubsystemBase
 {
     DoubleSubscriber xOffsetSubscriber;
     DoubleArraySubscriber postsSubscriber;
-    StringArrayPublisher cameraPathPublisher;
+    StringPublisher cameraPathPublisher;
+    StringPublisher rpub;
     double xOffset;
     double[] posts;
     boolean connected;
@@ -26,9 +28,8 @@ public class Vision extends SubsystemBase
         this.postsSubscriber = table.getDoubleArrayTopic("Posts").subscribe(new double[]
         {});
         this.xOffsetSubscriber = table.getDoubleTopic("CandidateMetersX").subscribe(Double.NaN);
-        cameraPathPublisher = table.getStringArrayTopic("CameraPath").publish();
-        cameraPathPublisher.set(new String[]
-        { "http://10.1.72.20:1181/stream.mjpg", "http://172.22.11.2:1187/stream.mjpg" });
+        cameraPathPublisher = table.getStringTopic("CameraPathRio").publish();
+        rpub = table.getStringTopic("CameraPathRadio").publish();
         this.deviceName = deviceName;
     }
 
@@ -46,6 +47,8 @@ public class Vision extends SubsystemBase
                 break;
             }
         }
+        rpub.set("10.1.72.36:1181");
+        cameraPathPublisher.set("172.22.11.2:1186");
     }
 
     public Optional<Double> getXOffset()

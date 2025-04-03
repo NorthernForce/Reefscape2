@@ -58,6 +58,7 @@ public class RobotContainer
     private final Superstructure superstructure;
     private final AlgaeExtractor algaeExtractor;
     private final Vision vision;
+    public boolean isFirstTime = false;
 
     private final LEDS leds;
 
@@ -88,7 +89,7 @@ public class RobotContainer
         {
             PortForwarder.add(5800 + i, "10.1.72.12", 5800 + i);
         }
-        for (int i = 5; i <= 4; i++)
+        for (int i = 0; i <= 4; i++)
         {
             PortForwarder.add(5805 + i, "10.1.72.15", 5800 + i);
         }
@@ -194,13 +195,11 @@ public class RobotContainer
 
         leds.setDefaultCommand(leds.noAlliance());
 
-        new Trigger(
-                () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red && DriverStation.isDisabled())
-                        .whileTrue(leds.redAlliance());
+        new Trigger(() -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red
+                && DriverStation.isDisabled() && isFirstTime).whileTrue(leds.redAlliance());
 
-        new Trigger(
-                () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue && DriverStation.isDisabled())
-                        .whileTrue(leds.blueAlliance());
+        new Trigger(() -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue
+                && DriverStation.isDisabled() && isFirstTime).whileTrue(leds.blueAlliance());
 
         new Trigger(() -> DriverStation.isAutonomousEnabled()).whileTrue(leds.auto());
 
@@ -210,9 +209,7 @@ public class RobotContainer
         new Trigger(() -> DriverStation.getMatchTime() > 20 && DriverStation.isTeleopEnabled() && manipulator.hasCoral()
                 && !vision.isAligned()).whileTrue(leds.happy());
 
-        new Trigger(
-                () -> DriverStation.getMatchTime() > 20 && DriverStation.isTeleopEnabled() && !manipulator.hasCoral())
-                        .whileTrue(leds.hungry());
+        new Trigger(() -> DriverStation.isTeleopEnabled() && !manipulator.hasCoral()).whileTrue(leds.hungry());
 
         new Trigger(() -> DriverStation.isTeleopEnabled() && vision.isAligned()).whileTrue(leds.readyToPlace());
     }

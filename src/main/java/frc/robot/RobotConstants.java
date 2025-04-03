@@ -95,7 +95,7 @@ public class RobotConstants
         public static final double kSlowOuttakeSpeed = 0.4;
         public static final double kPurgeSpeed = 0.2;
         public static final int kMotorId = 19;
-        public static final boolean kMotorInverted = false;
+        public static final boolean kMotorInverted = true;
         public static final int kSensorId = 2;
 
     }
