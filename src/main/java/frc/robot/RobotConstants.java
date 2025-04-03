@@ -64,7 +64,7 @@ public class RobotConstants
         public static final double kCloseDriveVI = 0.0;
         public static final double kCloseDriveVD = 0.1;
 
-        public static final Translation2d kPlacingOffset = new Translation2d(Inches.of(3.5), Inches.of(-11.75));
+        public static final Translation2d kPlacingOffset = new Translation2d(Inches.of(3.5), Inches.of(-11));
         public static final Angle[] SWERVE_MODULE_OFFSETS =
         { Rotations.of(Preferences.getDouble("kSwerveOffsetFrontLeft", TunerConstants.FrontLeft.EncoderOffset)),
                 Rotations.of(Preferences.getDouble("kSwerveOffsetFrontRight", TunerConstants.FrontRight.EncoderOffset)),
@@ -95,7 +95,7 @@ public class RobotConstants
         public static final double kSlowOuttakeSpeed = 0.4;
         public static final double kPurgeSpeed = 0.2;
         public static final int kMotorId = 19;
-        public static final boolean kMotorInverted = false;
+        public static final boolean kMotorInverted = true;
         public static final int kSensorId = 2;
 
     }
@@ -177,7 +177,8 @@ public class RobotConstants
 
     public static enum SuperstructureGoal
     {
-        L1(Inches.of(0), Inches.of(2)), L2(Inches.of(0), Inches.of(11.38)), L3(Inches.of(0), Inches.of(26.3)),
+        L1(Inches.of(0), Inches.of(2)), L2(Inches.of(0), Inches.of(11.38)),
+        L3(Inches.of(0), OuterElevatorConstants.kUpperLimit),
         L4(InnerElevatorConstants.kUpperLimit, OuterElevatorConstants.kUpperLimit),
         CORAL_STATION(Inches.of(0), Inches.of(0)), START(Inches.of(0), Inches.of(0));
 

@@ -23,6 +23,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.net.PortForwarder;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -57,6 +58,7 @@ public class RobotContainer
     private final Superstructure superstructure;
     private final AlgaeExtractor algaeExtractor;
     private final Vision vision;
+    public boolean isFirstTime = false;
 
     private final LEDS leds;
 
@@ -79,6 +81,21 @@ public class RobotContainer
         SmartDashboard.putData("AutonomousChooser", autonomousChooser);
         SmartDashboard.putData("Test Left Reef", driveToReefLeft());
         SmartDashboard.putData("Reset Encoders", drive.resetEncoders());
+        PortForwarder.add(1181, "10.1.72.11", 5800);
+        PortForwarder.add(1182, "10.1.72.11", 1181);
+        PortForwarder.add(1183, "10.1.72.13", 5800);
+        PortForwarder.add(1184, "10.1.72.13", 1181);
+        for (int i = 0; i <= 5; i++)
+        {
+            PortForwarder.add(5800 + i, "10.1.72.12", 5800 + i);
+        }
+        for (int i = 0; i <= 4; i++)
+        {
+            PortForwarder.add(5805 + i, "10.1.72.15", 5800 + i);
+        }
+        PortForwarder.add(1185, "10.1.72.15", 5805);
+        PortForwarder.add(1186, "10.1.72.36", 1181);
+        PortForwarder.add(1187, "10.1.72.36", 1182);
     }
 
     private static DoubleSupplier processJoystick(DoubleSupplier joystick)
@@ -114,8 +131,7 @@ public class RobotContainer
 
         driverController.rightTrigger()
                 .whileTrue(Commands.either(manipulator.slowOuttake().andThen(drive.strafeRight(0.8).withTimeout(0.5)),
-                        manipulator.outtake(), () -> superstructure.isAtHeight(SuperstructureGoal.L1.getState()))
-                        .onlyIf(() -> superstructure.isAtTargetState()));
+                        manipulator.outtake(), () -> superstructure.isAtHeight(SuperstructureGoal.L1.getState())));
 
         driverController.leftTrigger().whileTrue(algaeExtractor.getExtractCommand());
 
@@ -134,8 +150,7 @@ public class RobotContainer
 
         manipulatorController.rightTrigger()
                 .whileTrue(Commands.either(manipulator.slowOuttake().andThen(drive.strafeRight(0.8).withTimeout(0.5)),
-                        manipulator.outtake(), () -> superstructure.isAtHeight(SuperstructureGoal.L1.getState()))
-                        .onlyIf(() -> superstructure.isAtTargetState()));
+                        manipulator.outtake(), () -> superstructure.isAtHeight(SuperstructureGoal.L1.getState())));
 
         manipulatorController.leftTrigger().whileTrue(algaeExtractor.getExtractCommand());
 
@@ -172,19 +187,17 @@ public class RobotContainer
         NamedCommands.registerCommand("Outtake",
                 Commands.deadline(manipulator.outtake().andThen(Commands.waitSeconds(0.1)), superstructure.holdAtL4()));
         NamedCommands.registerCommand("RemoveAlgae",
-                drive.strafeLeft(0.1).withTimeout(0.1)
+                drive.strafeLeft(0.1).withTimeout(0.6)
                         .andThen(algaeExtractor.getExtractCommand().alongWith(drive.goBackward(0.2).withTimeout(2)))
                         .andThen(drive.stop()));
 
         leds.setDefaultCommand(leds.noAlliance());
 
-        new Trigger(
-                () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red && DriverStation.isDisabled())
-                        .whileTrue(leds.redAlliance());
+        new Trigger(() -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red
+                && DriverStation.isDisabled() && isFirstTime).whileTrue(leds.redAlliance());
 
-        new Trigger(
-                () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue && DriverStation.isDisabled())
-                        .whileTrue(leds.blueAlliance());
+        new Trigger(() -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue
+                && DriverStation.isDisabled() && isFirstTime).whileTrue(leds.blueAlliance());
 
         new Trigger(() -> DriverStation.isAutonomousEnabled()).whileTrue(leds.auto());
 
@@ -194,9 +207,7 @@ public class RobotContainer
         new Trigger(() -> DriverStation.getMatchTime() > 20 && DriverStation.isTeleopEnabled() && manipulator.hasCoral()
                 && !vision.isAligned()).whileTrue(leds.happy());
 
-        new Trigger(
-                () -> DriverStation.getMatchTime() > 20 && DriverStation.isTeleopEnabled() && !manipulator.hasCoral())
-                        .whileTrue(leds.hungry());
+        new Trigger(() -> DriverStation.isTeleopEnabled() && !manipulator.hasCoral()).whileTrue(leds.hungry());
 
         new Trigger(() -> DriverStation.isTeleopEnabled() && vision.isAligned()).whileTrue(leds.readyToPlace());
     }
@@ -340,11 +351,6 @@ public class RobotContainer
     public Pose3d getRobotPose3d()
     {
         return new Pose3d(drive.getPose());
-    }
-
-    public void resetPose()
-    {
-        drive.resetPose(new Pose2d());
     }
 
     public String[] getCommandsRunning()
