@@ -187,7 +187,7 @@ public class RobotContainer
         NamedCommands.registerCommand("Outtake",
                 Commands.deadline(manipulator.outtake().andThen(Commands.waitSeconds(0.1)), superstructure.holdAtL4()));
         NamedCommands.registerCommand("RemoveAlgae",
-                drive.strafeLeft(0.1).withTimeout(0.1)
+                drive.strafeLeft(0.1).withTimeout(0.6)
                         .andThen(algaeExtractor.getExtractCommand().alongWith(drive.goBackward(0.2).withTimeout(2)))
                         .andThen(drive.stop()));
 
@@ -351,11 +351,6 @@ public class RobotContainer
     public Pose3d getRobotPose3d()
     {
         return new Pose3d(drive.getPose());
-    }
-
-    public void resetPose()
-    {
-        drive.resetPose(new Pose2d());
     }
 
     public String[] getCommandsRunning()

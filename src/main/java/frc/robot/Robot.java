@@ -76,7 +76,7 @@ public class Robot extends TimedRobot
     {
         m_robotContainer.autonomousInit();
         m_autonomousCommand = m_robotContainer.getAutonomousCommand();
-        m_robotContainer.resetPose();
+        // m_robotContainer.resetPose();
         if (m_autonomousCommand != null)
         {
             m_autonomousCommand.schedule();
