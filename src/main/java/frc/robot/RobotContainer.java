@@ -150,8 +150,7 @@ public class RobotContainer
 
         manipulatorController.rightTrigger()
                 .whileTrue(Commands.either(manipulator.slowOuttake().andThen(drive.strafeRight(0.8).withTimeout(0.5)),
-                        manipulator.outtake(), () -> superstructure.isAtHeight(SuperstructureGoal.L1.getState()))
-                        .onlyIf(() -> superstructure.isAtTargetState()));
+                        manipulator.outtake(), () -> superstructure.isAtHeight(SuperstructureGoal.L1.getState())));
 
         manipulatorController.leftTrigger().whileTrue(algaeExtractor.getExtractCommand());
 
