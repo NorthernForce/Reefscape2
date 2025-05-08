@@ -10,6 +10,7 @@ import edu.wpi.first.epilogue.Epilogue;
 import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.epilogue.logging.errors.ErrorHandler;
 import edu.wpi.first.wpilibj.DataLogManager;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -37,8 +38,22 @@ public class Robot extends TimedRobot
     @Override
     public void robotPeriodic()
     {
-        m_robotContainer.periodic();
-        CommandScheduler.getInstance().run();
+        if (DriverStation.isFMSAttached())
+        {
+            try
+            {
+                m_robotContainer.periodic();
+                CommandScheduler.getInstance().run();
+            } catch (Exception e)
+            {
+                DriverStation.reportError(e.getMessage(), e.getStackTrace());
+            }
+        } else
+        {
+            m_robotContainer.periodic();
+            CommandScheduler.getInstance().run();
+        }
+        m_robotContainer.isFirstTime = true;
     }
 
     @Override
@@ -61,7 +76,7 @@ public class Robot extends TimedRobot
     {
         m_robotContainer.autonomousInit();
         m_autonomousCommand = m_robotContainer.getAutonomousCommand();
-        m_robotContainer.resetPose();
+        // m_robotContainer.resetPose();
         if (m_autonomousCommand != null)
         {
             m_autonomousCommand.schedule();
